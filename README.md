@@ -1,4 +1,9 @@
-# obsidian-calendar-plugin
+# Obsidian Calendar Reborn
+
+> [!NOTE]
+>This is a fork of the original [Liam Cain Calendar Plugin](https://github.com/liamcain/obsidian-calendar-plugin) that brings the plugin on par with modern Obsidian. The original plugin, in fact, is not updated since 2022, that is, a geological era in Obsidian-time.
+>
+>There are other alternatives, but my goal is to keep this as clean and lean as possible. At least while we wait we get a core Calendar plugin. :D
 
 This plugin for [Obsidian](https://obsidian.md/) creates a simple Calendar view for visualizing and navigating between your daily notes.
 
