@@ -7,6 +7,7 @@ import {
   getWeeklyNoteSettings,
 } from "obsidian-daily-notes-interface";
 import { FileView, TFile, ItemView, WorkspaceLeaf } from "obsidian";
+import type { OpenViewState } from "obsidian";
 import { get } from "svelte/store";
 
 import { TRIGGER_ON_OPEN, VIEW_TYPE_CALENDAR } from "src/constants";
@@ -117,7 +118,7 @@ export default class CalendarView extends ItemView {
   onHoverDay(
     date: Moment,
     targetEl: EventTarget,
-    isMetaPressed: boolean
+    isMetaPressed?: boolean
   ): void {
     if (!isMetaPressed) {
       return;
@@ -136,7 +137,7 @@ export default class CalendarView extends ItemView {
   onHoverWeek(
     date: Moment,
     targetEl: EventTarget,
-    isMetaPressed: boolean
+    isMetaPressed?: boolean
   ): void {
     if (!isMetaPressed) {
       return;
@@ -306,7 +307,7 @@ export default class CalendarView extends ItemView {
     const leaf = inNewSplit
       ? workspace.splitActiveLeaf()
       : workspace.getUnpinnedLeaf();
-    await leaf.openFile(existingFile, { active : true, mode });
+    await leaf.openFile(existingFile, { active: true, mode } as OpenViewState);
 
     activeFile.setFile(existingFile);
   }

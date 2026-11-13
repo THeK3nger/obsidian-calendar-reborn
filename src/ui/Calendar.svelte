@@ -4,9 +4,9 @@
   import type { Moment } from "moment";
   import {
     Calendar as CalendarBase,
-    ICalendarSource,
     configureGlobalMomentLocale,
   } from "obsidian-calendar-ui";
+  import type { ICalendarSource } from "obsidian-calendar-ui";
   import { onDestroy } from "svelte";
 
   import type { ISettings } from "src/settings";
@@ -18,12 +18,37 @@
 
   export let displayedMonth: Moment = today;
   export let sources: ICalendarSource[];
-  export let onHoverDay: (date: Moment, targetEl: EventTarget) => boolean;
-  export let onHoverWeek: (date: Moment, targetEl: EventTarget) => boolean;
-  export let onClickDay: (date: Moment, isMetaPressed: boolean) => boolean;
-  export let onClickWeek: (date: Moment, isMetaPressed: boolean) => boolean;
-  export let onContextMenuDay: (date: Moment, event: MouseEvent) => boolean;
-  export let onContextMenuWeek: (date: Moment, event: MouseEvent) => boolean;
+  export let onHoverDay: (
+    date: Moment,
+    targetEl: EventTarget,
+    isMetaPressed?: boolean
+  ) => void;
+  export let onHoverWeek: (
+    date: Moment,
+    targetEl: EventTarget,
+    isMetaPressed?: boolean
+  ) => void;
+  export let onClickDay: (
+    date: Moment,
+    isMetaPressed: boolean
+  ) => void | Promise<void>;
+  export let onClickWeek: (
+    date: Moment,
+    isMetaPressed: boolean
+  ) => void | Promise<void>;
+  export let onContextMenuDay: (date: Moment, event: MouseEvent) => void;
+  export let onContextMenuWeek: (date: Moment, event: MouseEvent) => void;
+
+  // The library's typings declare these handlers as returning boolean, but the
+  // return value is never used.
+  const contextMenuDay = (date: Moment, event: MouseEvent): boolean => {
+    onContextMenuDay(date, event);
+    return true;
+  };
+  const contextMenuWeek = (date: Moment, event: MouseEvent): boolean => {
+    onContextMenuWeek(date, event);
+    return true;
+  };
 
   export function tick() {
     today = window.moment();
@@ -58,8 +83,8 @@
   {today}
   {onHoverDay}
   {onHoverWeek}
-  {onContextMenuDay}
-  {onContextMenuWeek}
+  onContextMenuDay={contextMenuDay}
+  onContextMenuWeek={contextMenuWeek}
   {onClickDay}
   {onClickWeek}
   bind:displayedMonth
