@@ -35,7 +35,7 @@ const weekdays = [
 
 export const defaultSettings = Object.freeze({
   shouldConfirmBeforeCreate: true,
-  weekStart: "locale" as IWeekStartOption,
+  weekStart: "locale",
 
   wordsPerDot: DEFAULT_WORDS_PER_DOT,
 

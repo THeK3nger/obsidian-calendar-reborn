@@ -2,6 +2,7 @@
 // Copies the new package.json version into manifest.json and records the
 // minimum Obsidian version it requires in versions.json.
 import { readFileSync, writeFileSync } from "node:fs";
+import process from "node:process";
 
 const targetVersion = process.env.npm_package_version;
 if (!targetVersion) {

@@ -13,13 +13,6 @@ import CalendarView from "./view";
 
 export default class CalendarPlugin extends Plugin {
   public options: ISettings;
-  private view: CalendarView;
-
-  onunload(): void {
-    this.app.workspace
-      .getLeavesOfType(VIEW_TYPE_CALENDAR)
-      .forEach((leaf) => leaf.detach());
-  }
 
   async onload(): Promise<void> {
     this.register(
@@ -31,7 +24,7 @@ export default class CalendarPlugin extends Plugin {
 
     this.registerView(
       VIEW_TYPE_CALENDAR,
-      (leaf: WorkspaceLeaf) => (this.view = new CalendarView(leaf))
+      (leaf: WorkspaceLeaf) => new CalendarView(leaf)
     );
 
     this.addCommand({
@@ -49,19 +42,23 @@ export default class CalendarPlugin extends Plugin {
 
     this.addCommand({
       id: "open-weekly-note",
-      name: "Open Weekly Note",
+      name: "Open weekly note",
       checkCallback: (checking) => {
         if (checking) {
           return !appHasPeriodicNotesPluginLoaded();
         }
-        void this.view.openOrCreateWeeklyNote(window.moment(), false);
+        void this.getCalendarView().then((view) =>
+          view?.openOrCreateWeeklyNote(window.moment(), false)
+        );
       },
     });
 
     this.addCommand({
       id: "reveal-active-note",
       name: "Reveal active note",
-      callback: () => this.view.revealActiveNote(),
+      callback: () => {
+        void this.getCalendarView().then((view) => view?.revealActiveNote());
+      },
     });
 
     await this.loadOptions();
@@ -69,6 +66,19 @@ export default class CalendarPlugin extends Plugin {
     this.addSettingTab(new CalendarSettingsTab(this.app, this));
 
     this.app.workspace.onLayoutReady(() => this.initLeaf());
+  }
+
+  /**
+   * Looks up the open calendar view instead of keeping a reference to it,
+   * so a closed view can be garbage-collected.
+   */
+  private async getCalendarView(): Promise<CalendarView | null> {
+    const leaf = this.app.workspace.getLeavesOfType(VIEW_TYPE_CALENDAR)[0];
+    if (!leaf) {
+      return null;
+    }
+    await leaf.loadIfDeferred();
+    return leaf.view instanceof CalendarView ? leaf.view : null;
   }
 
   initLeaf(): void {
