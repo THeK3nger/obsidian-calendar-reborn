@@ -1,6 +1,6 @@
 import { normalizePath, Notice, TFile, TFolder, Vault } from "obsidian";
 
-import { appHasYearlyNotesPluginLoaded } from "./index";
+import { appHasYearlyNotesPluginLoaded } from "./plugins";
 import type { DurationConstructor, Moment } from "./moment-types";
 import { getDateFromFile, getDateUID } from "./parse";
 import { getYearlyNoteSettings } from "./settings";

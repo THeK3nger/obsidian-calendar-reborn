@@ -9,13 +9,23 @@
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let isMobile = (window.app as any).isMobile;
+
+  function onKeyDown(event: KeyboardEvent) {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      onClick();
+    }
+  }
 </script>
 
 <div
   class="arrow"
   class:is-mobile={isMobile}
   class:right={direction === 'right'}
+  role="button"
+  tabindex="0"
   onclick={onClick}
+  onkeydown={onKeyDown}
   aria-label={tooltip}
 >
   <svg

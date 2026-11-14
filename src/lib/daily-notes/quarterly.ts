@@ -1,6 +1,6 @@
 import { normalizePath, Notice, TFile, TFolder, Vault } from "obsidian";
 
-import { appHasQuarterlyNotesPluginLoaded } from "./index";
+import { appHasQuarterlyNotesPluginLoaded } from "./plugins";
 import type { DurationConstructor, Moment } from "./moment-types";
 import { getDateFromFile, getDateUID } from "./parse";
 import { getQuarterlyNoteSettings } from "./settings";

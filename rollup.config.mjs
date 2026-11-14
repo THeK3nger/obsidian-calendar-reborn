@@ -13,6 +13,16 @@ export default {
     exports: "default",
   },
   external: ["obsidian", "fs", "os", "path"],
+  onwarn(warning, warn) {
+    // Svelte's own runtime has internal import cycles; they are harmless.
+    if (
+      warning.code === "CIRCULAR_DEPENDENCY" &&
+      warning.ids?.every((id) => id.includes("node_modules"))
+    ) {
+      return;
+    }
+    warn(warning);
+  },
   plugins: [
     svelte({
       emitCss: false,

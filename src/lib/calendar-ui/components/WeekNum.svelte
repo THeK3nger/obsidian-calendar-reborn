@@ -37,6 +37,8 @@
 <td>
   <MetadataResolver metadata={metadata} >
     {#snippet children({ metadata })}
+        <!-- Pointer-driven cell (hover preview, context menu), same as Day. -->
+        <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
         <div
         class="{`week-num ${metadata.classes.join(' ')}`}"
         class:active={selectedId === getDateUID(days[0], 'week')}

@@ -24,9 +24,18 @@
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let isMobile = (window.app as any).isMobile;
+
+  function onResetKeyDown(event: KeyboardEvent) {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      resetDisplayedMonth();
+    }
+  }
 </script>
 
 <div class="nav" class:is-mobile={isMobile}>
+  <!-- Keyboard users reset the month with the "today" button below. -->
+  <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_noninteractive_element_interactions -->
   <h3 class="title" onclick={resetDisplayedMonth}>
     <span class="month">{displayedMonth.format("MMM")}</span>
     <span class="year">{displayedMonth.format("YYYY")}</span>
@@ -37,7 +46,13 @@
       onClick={decrementDisplayedMonth}
       tooltip="Previous Month"
     />
-    <div class="reset-button" onclick={resetDisplayedMonth}>
+    <div
+      class="reset-button"
+      role="button"
+      tabindex="0"
+      onclick={resetDisplayedMonth}
+      onkeydown={onResetKeyDown}
+    >
       {todayDisplayStr}
     </div>
     <Arrow

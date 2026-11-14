@@ -6,8 +6,8 @@ import {
   getWeeklyNote,
   getWeeklyNoteSettings,
 } from "src/lib/daily-notes";
-import { FileView, TFile, ItemView, WorkspaceLeaf } from "obsidian";
-import type { OpenViewState } from "obsidian";
+import { FileView, TFile, ItemView } from "obsidian";
+import type { OpenViewState, WorkspaceLeaf } from "obsidian";
 import { get } from "svelte/store";
 
 import { TRIGGER_ON_OPEN, VIEW_TYPE_CALENDAR } from "src/constants";
@@ -26,11 +26,13 @@ import {
 } from "./ui/sources";
 import { mount, unmount } from "svelte";
 
+interface CalendarHandle {
+  tick(): void;
+  setDisplayedMonth(date: Moment): void;
+}
+
 export default class CalendarView extends ItemView {
-  private calendar: {
-    tick(): void;
-    setDisplayedMonth(date: Moment): void;
-  };
+  private calendar: CalendarHandle;
   private settings: ISettings;
 
   constructor(leaf: WorkspaceLeaf) {
@@ -116,7 +118,7 @@ export default class CalendarView extends ItemView {
         onContextMenuWeek: this.onContextMenuWeek,
         sources,
       },
-    });
+    }) as CalendarHandle;
   }
 
   onHoverDay(

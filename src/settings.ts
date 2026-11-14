@@ -1,4 +1,5 @@
-import { App, PluginSettingTab, Setting } from "obsidian";
+import { PluginSettingTab, Setting } from "obsidian";
+import type { App } from "obsidian";
 import { appHasDailyNotesPluginLoaded } from "src/lib/daily-notes";
 import type { ILocaleOverride, IWeekStartOption } from "src/lib/calendar-ui";
 
