@@ -1,6 +1,5 @@
-import type { WeekSpec } from "moment";
 import { Plugin } from "obsidian";
-import type { App, WorkspaceLeaf } from "obsidian";
+import type { WorkspaceLeaf } from "obsidian";
 
 import { VIEW_TYPE_CALENDAR } from "./constants";
 import { settings } from "./ui/stores";
@@ -10,13 +9,6 @@ import {
 } from "./settings";
 import type { ISettings } from "./settings";
 import CalendarView from "./view";
-
-declare global {
-  interface Window {
-    app: App;
-    _bundledLocaleWeekSpec: WeekSpec;
-  }
-}
 
 export default class CalendarPlugin extends Plugin {
   public options: ISettings;
