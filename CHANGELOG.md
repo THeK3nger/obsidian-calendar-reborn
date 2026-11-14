@@ -1,6 +1,10 @@
 # Changelog
 
 ## [Unreleased]
+### Behind the Scenes
+
+- Consolidated the five duplicated periodic-note implementations into one shared implementation.
+
 
 ## v2.1.0
 

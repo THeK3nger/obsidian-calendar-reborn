@@ -6,6 +6,7 @@ import {
   DEFAULT_YEARLY_NOTE_FORMAT,
 } from "./constants";
 import type {
+  IGranularity,
   IPeriodicGranularity,
   IPeriodicNoteConfig,
   IPeriodicNoteSettings,
@@ -60,9 +61,12 @@ const DEFAULT_FORMATS: Record<IPeriodicGranularity, string> = {
   year: DEFAULT_YEARLY_NOTE_FORMAT,
 };
 
-function getConfiguredNoteSettings(
-  granularity: IPeriodicGranularity
+export function getPeriodicNoteSettings(
+  granularity: IGranularity
 ): IPeriodicNoteSettings {
+  if (granularity === "day") {
+    return getDailyNoteSettings();
+  }
   const config = periodicNoteConfig[granularity];
   return {
     format: config?.format || DEFAULT_FORMATS[granularity],
@@ -72,17 +76,17 @@ function getConfiguredNoteSettings(
 }
 
 export function getWeeklyNoteSettings(): IPeriodicNoteSettings {
-  return getConfiguredNoteSettings("week");
+  return getPeriodicNoteSettings("week");
 }
 
 export function getMonthlyNoteSettings(): IPeriodicNoteSettings {
-  return getConfiguredNoteSettings("month");
+  return getPeriodicNoteSettings("month");
 }
 
 export function getQuarterlyNoteSettings(): IPeriodicNoteSettings {
-  return getConfiguredNoteSettings("quarter");
+  return getPeriodicNoteSettings("quarter");
 }
 
 export function getYearlyNoteSettings(): IPeriodicNoteSettings {
-  return getConfiguredNoteSettings("year");
+  return getPeriodicNoteSettings("year");
 }
