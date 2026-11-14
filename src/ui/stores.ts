@@ -22,7 +22,7 @@ function createDailyNotesStore() {
       } catch (err) {
         if (!hasError) {
           // Avoid error being shown multiple times
-          console.log("[Calendar] Failed to find daily notes folder", err);
+          console.warn("[Calendar Reborn] Failed to find daily notes folder", err);
         }
         store.set({});
         hasError = true;
@@ -44,7 +44,7 @@ function createWeeklyNotesStore() {
       } catch (err) {
         if (!hasError) {
           // Avoid error being shown multiple times
-          console.log("[Calendar] Failed to find weekly notes folder", err);
+          console.warn("[Calendar Reborn] Failed to find weekly notes folder", err);
         }
         store.set({});
         hasError = true;

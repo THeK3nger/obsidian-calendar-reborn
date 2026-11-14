@@ -43,8 +43,8 @@ export function getDailyNoteSettings(): IPeriodicNoteSettings {
       folder: validateString(folder).trim(),
       template: validateString(template).trim(),
     };
-  } catch (err) {
-    console.info("No custom daily note settings found!", err);
+  } catch {
+    // Settings are read from other plugins; fall through on unexpected shapes.
   }
 }
 
@@ -89,8 +89,8 @@ export function getWeeklyNoteSettings(): IPeriodicNoteSettings {
       folder: validateString(settings.weeklyNoteFolder).trim(),
       template: validateString(settings.weeklyNoteTemplate).trim(),
     };
-  } catch (err) {
-    console.info("No custom weekly note settings found!", err);
+  } catch {
+    // Settings are read from other plugins; fall through on unexpected shapes.
   }
 }
 
@@ -112,8 +112,8 @@ export function getMonthlyNoteSettings(): IPeriodicNoteSettings {
       folder: validateString(settings.folder).trim(),
       template: validateString(settings.template).trim(),
     };
-  } catch (err) {
-    console.info("No custom monthly note settings found!", err);
+  } catch {
+    // Settings are read from other plugins; fall through on unexpected shapes.
   }
 }
 
@@ -135,8 +135,8 @@ export function getQuarterlyNoteSettings(): IPeriodicNoteSettings {
       folder: validateString(settings.folder).trim(),
       template: validateString(settings.template).trim(),
     };
-  } catch (err) {
-    console.info("No custom quarterly note settings found!", err);
+  } catch {
+    // Settings are read from other plugins; fall through on unexpected shapes.
   }
 }
 
@@ -158,7 +158,7 @@ export function getYearlyNoteSettings(): IPeriodicNoteSettings {
       folder: validateString(settings.folder).trim(),
       template: validateString(settings.template).trim(),
     };
-  } catch (err) {
-    console.info("No custom yearly note settings found!", err);
+  } catch {
+    // Settings are read from other plugins; fall through on unexpected shapes.
   }
 }
