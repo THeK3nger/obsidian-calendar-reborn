@@ -1,9 +1,12 @@
 import { PluginSettingTab } from "obsidian";
 import type { App, SettingDefinitionItem } from "obsidian";
 import { appHasDailyNotesPluginLoaded } from "src/lib/daily-notes";
+import type { IPeriodicNoteConfig } from "src/lib/daily-notes";
 import type { ILocaleOverride, IWeekStartOption } from "src/lib/calendar-ui";
 
-import { DEFAULT_WEEK_FORMAT, DEFAULT_WORDS_PER_DOT } from "src/constants";
+import { DEFAULT_WORDS_PER_DOT } from "src/constants";
+import { PERIODICITIES } from "src/periodicity";
+import type { IPeriodicityInfo, Periodicity } from "src/periodicity";
 
 import type CalendarPlugin from "./main";
 
@@ -12,16 +15,22 @@ export interface ISettings {
   weekStart: IWeekStartOption;
   shouldConfirmBeforeCreate: boolean;
 
-  // Weekly Note settings
+  /** Show the week-number column. */
   showWeeklyNote: boolean;
-  weeklyNoteFormat: string;
-  weeklyNoteTemplate: string;
-  weeklyNoteFolder: string;
+
+  weekly: IPeriodicNoteConfig;
+  monthly: IPeriodicNoteConfig;
+  quarterly: IPeriodicNoteConfig;
+  yearly: IPeriodicNoteConfig;
+
+  /** Set once settings were imported from Periodic Notes and legacy fields. */
+  periodicNotesMigrated: boolean;
 
   localeOverride: ILocaleOverride;
 }
 
-type SettingKey = keyof ISettings;
+type PeriodicSettingKey = `${Periodicity}.${keyof IPeriodicNoteConfig}`;
+type SettingKey = keyof ISettings | PeriodicSettingKey;
 
 const weekdays = [
   "sunday",
@@ -33,23 +42,31 @@ const weekdays = [
   "saturday",
 ];
 
-export const defaultSettings = Object.freeze({
+function defaultPeriodicConfig(): IPeriodicNoteConfig {
+  return { enabled: false, format: "", folder: "", template: "" };
+}
+
+export const defaultSettings: Readonly<ISettings> = Object.freeze({
   shouldConfirmBeforeCreate: true,
   weekStart: "locale",
 
   wordsPerDot: DEFAULT_WORDS_PER_DOT,
 
   showWeeklyNote: false,
-  weeklyNoteFormat: "",
-  weeklyNoteTemplate: "",
-  weeklyNoteFolder: "",
+
+  weekly: defaultPeriodicConfig(),
+  monthly: defaultPeriodicConfig(),
+  quarterly: defaultPeriodicConfig(),
+  yearly: defaultPeriodicConfig(),
+
+  periodicNotesMigrated: false,
 
   localeOverride: "system-default",
 });
 
-export function appHasPeriodicNotesPluginLoaded(): boolean {
-  const periodicNotes = window.app.plugins.getPlugin("periodic-notes");
-  return !!periodicNotes?.settings?.weekly?.enabled;
+/** True while the community Periodic Notes plugin is still enabled. */
+export function isPeriodicNotesPluginEnabled(): boolean {
+  return window.app.plugins.enabledPlugins.has("periodic-notes");
 }
 
 function weekStartOptions(): Record<string, string> {
@@ -89,13 +106,79 @@ export class CalendarSettingsTab extends PluginSettingTab {
   }
 
   getControlValue(key: string): unknown {
-    return this.plugin.options[key as SettingKey];
+    const [settingKey, field] = key.split(".") as [
+      keyof ISettings,
+      keyof IPeriodicNoteConfig | undefined,
+    ];
+    const value = this.plugin.options[settingKey];
+    return field ? (value as IPeriodicNoteConfig)[field] : value;
   }
 
   async setControlValue(key: string, value: unknown): Promise<void> {
-    await this.plugin.writeOptions(() => ({ [key as SettingKey]: value }));
+    const [settingKey, field] = key.split(".") as [
+      keyof ISettings,
+      keyof IPeriodicNoteConfig | undefined,
+    ];
+    await this.plugin.writeOptions((old) => ({
+      [settingKey]: field
+        ? { ...(old[settingKey] as IPeriodicNoteConfig), [field]: value }
+        : value,
+    }));
     // Other settings' `visible` predicates depend on these values.
     this.refreshDomState();
+  }
+
+  private periodicNoteGroup({
+    periodicity,
+    label,
+    unit,
+    defaultFormat,
+  }: IPeriodicityInfo): SettingDefinitionItem<SettingKey> {
+    const lower = label.toLowerCase();
+    return {
+      type: "group",
+      heading: `${label} notes`,
+      items: [
+        {
+          name: `Enable ${lower} notes`,
+          desc: `Create and open a note for each ${unit}.`,
+          control: {
+            type: "toggle",
+            key: `${periodicity}.enabled`,
+            defaultValue: false,
+          },
+        },
+        {
+          name: "Format",
+          desc: "Moment.js date format used for the note's file name.",
+          visible: () => this.plugin.options[periodicity].enabled,
+          control: {
+            type: "text",
+            key: `${periodicity}.format`,
+            placeholder: defaultFormat,
+          },
+        },
+        {
+          name: "Template",
+          desc: `The file used as the template for new ${lower} notes.`,
+          visible: () => this.plugin.options[periodicity].enabled,
+          control: {
+            type: "file",
+            key: `${periodicity}.template`,
+          },
+        },
+        {
+          name: "Folder",
+          desc: `New ${lower} notes will be placed here.`,
+          visible: () => this.plugin.options[periodicity].enabled,
+          control: {
+            type: "folder",
+            key: `${periodicity}.folder`,
+            includeRoot: true,
+          },
+        },
+      ],
+    };
   }
 
   getSettingDefinitions(): SettingDefinitionItem<SettingKey>[] {
@@ -106,7 +189,18 @@ export class CalendarSettingsTab extends PluginSettingTab {
         items: [
           {
             name: "⚠️ Daily Notes plugin not enabled",
-            desc: "The calendar is best used in conjunction with either the Daily Notes plugin or the Periodic Notes plugin (available in the Community Plugins catalog).",
+            desc: "Daily notes use the settings of the core Daily Notes plugin. Enable it to create daily notes from the calendar.",
+          },
+        ],
+      },
+      {
+        type: "group",
+        visible: () => isPeriodicNotesPluginEnabled(),
+        items: [
+          {
+            name: "Periodic Notes plugin is no longer needed",
+            desc: "Calendar Reborn now manages weekly, monthly, quarterly and yearly notes itself, and has imported your Periodic Notes settings. You can disable and uninstall the Periodic Notes plugin.",
+            searchable: false,
           },
         ],
       },
@@ -146,7 +240,7 @@ export class CalendarSettingsTab extends PluginSettingTab {
           },
           {
             name: "Show week number",
-            desc: "Enable this to add a column with the week number.",
+            desc: "Add a column with the week number. Clicking it opens the weekly note when weekly notes are enabled.",
             control: {
               type: "toggle",
               key: "showWeeklyNote",
@@ -155,46 +249,7 @@ export class CalendarSettingsTab extends PluginSettingTab {
           },
         ],
       },
-      {
-        type: "group",
-        heading: "Weekly notes",
-        visible: () =>
-          this.plugin.options.showWeeklyNote &&
-          !appHasPeriodicNotesPluginLoaded(),
-        items: [
-          {
-            name: "Weekly note settings are moving",
-            desc: "You are encouraged to install the 'Periodic Notes' plugin to keep the functionality in the future.",
-            searchable: false,
-          },
-          {
-            name: "Weekly note format",
-            desc: "For more syntax help, refer to format reference.",
-            control: {
-              type: "text",
-              key: "weeklyNoteFormat",
-              placeholder: DEFAULT_WEEK_FORMAT,
-            },
-          },
-          {
-            name: "Weekly note template",
-            desc: "Choose the file you want to use as the template for your weekly notes.",
-            control: {
-              type: "file",
-              key: "weeklyNoteTemplate",
-            },
-          },
-          {
-            name: "Weekly note folder",
-            desc: "New weekly notes will be placed here.",
-            control: {
-              type: "folder",
-              key: "weeklyNoteFolder",
-              includeRoot: true,
-            },
-          },
-        ],
-      },
+      ...PERIODICITIES.map((info) => this.periodicNoteGroup(info)),
       {
         type: "group",
         heading: "Advanced",

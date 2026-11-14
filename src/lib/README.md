@@ -6,3 +6,7 @@ the project itself, so the root `LICENSE` covers them.
 
 - `calendar-ui/` — from `obsidian-calendar-ui` 0.3.12 (the source shipped in the npm package).
 - `daily-notes/` — from [`obsidian-daily-notes-interface`](https://github.com/liamcain/obsidian-daily-notes-interface) 0.9.5 (tag `v0.9.5`). Its vitest test suite was not carried over.
+
+`daily-notes/` no longer reads settings from the Periodic Notes plugin: daily
+notes follow the core Daily Notes plugin, and the other granularities are
+configured by this plugin through `setPeriodicNoteConfig`.

@@ -1,9 +1,8 @@
 import { normalizePath, Notice, TFile, TFolder, Vault } from "obsidian";
 
-import { appHasQuarterlyNotesPluginLoaded } from "./plugins";
 import type { DurationConstructor, Moment } from "./moment-types";
 import { getDateFromFile, getDateUID } from "./parse";
-import { getQuarterlyNoteSettings } from "./settings";
+import { getQuarterlyNoteSettings, isPeriodicNoteEnabled } from "./settings";
 import { getNotePath, getTemplateInfo } from "./vault";
 
 export class QuarterlyNotesFolderMissingError extends Error {}
@@ -82,7 +81,7 @@ export function getQuarterlyNote(
 export function getAllQuarterlyNotes(): Record<string, TFile> {
   const quarterly: Record<string, TFile> = {};
 
-  if (!appHasQuarterlyNotesPluginLoaded()) {
+  if (!isPeriodicNoteEnabled("quarter")) {
     return quarterly;
   }
   const { vault } = window.app;

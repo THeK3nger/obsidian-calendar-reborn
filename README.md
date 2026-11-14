@@ -20,14 +20,15 @@ The plugin reads your Daily Note settings to know your date format, your daily n
 - Go to any **daily note**.
 - Create new daily notes for days that don't have one. (This is helpful for when you need to backfill old notes or if you're planning ahead for future notes! This will use your current **daily note** template!)
 - Visualize your writing. Each day includes a meter to approximate how much you've written that day.
-- Use **Weekly notes** for an added organization layer! They work just like daily notes, but have their own customization options.
+- Use **weekly, monthly, quarterly and yearly notes** for an added organization layer! They work just like daily notes, but have their own customization options. (This replaces the Periodic Notes plugin: see [Periodic notes](#periodic-notes).)
 
 ## Settings
 
 - **Start week on [default: locale]**: Configure the Calendar view to show Sunday or Monday as the first day of the week. Choosing 'locale' will set the start day to be whatever is the default for your chosen locale (`Settings > About > Language`)
 - **Words per Dot [default: 250]**: Starting in version 1.3, dots reflect the word count of your files. By default, each dot represents 250 words, you can change that value to whatever you want. Set this to `0` to disable the word count entirely. **Note:** There is a max of 5 dots so that the view doesn't get too big!
 - **Confirm before creating new note [default: on]**: If you don't like that a modal prompts you before creating a new daily note, you can turn it off.
-- **Show Week Number [default: off]**: Enable this to add a new column to the calendar view showing the [Week Number](https://en.wikipedia.org/wiki/Week#Week_numbering). Clicking on these cells will open your **weekly note**.
+- **Show Week Number [default: off]**: Enable this to add a new column to the calendar view showing the [Week Number](https://en.wikipedia.org/wiki/Week#Week_numbering). Clicking on these cells will open your **weekly note**, if weekly notes are enabled.
+- **Weekly / Monthly / Quarterly / Yearly notes [default: off]**: Enable each kind of periodic note and set its format, template and folder. Daily notes keep using the settings of Obsidian's core **Daily Notes** plugin.
 
 ## Customization
 
@@ -91,7 +92,7 @@ By default, the calendar should seamlessly match your theme, but if you'd like t
 
 ### Can I add week numbers to the calendar?
 
-In the settings, you can enable "Show Week Numbers" to add a "week number" column to the calendar. Click on the week number to open a "weekly note".
+In the settings, you can enable "Show Week Numbers" to add a "week number" column to the calendar. With weekly notes enabled, click on the week number to open a "weekly note".
 
 ### How do I hide the calendar plugin without disabling the plugin?
 
@@ -115,9 +116,7 @@ If you want the weekly note format to include a word (e.g. "Week 21 of Year 2020
 
 ### I don't like showing the week numbers but I still want to use weekly notes. Can I still use them?
 
-You can open the current weekly note from the command palette by searching `Calendar: Open weekly Note`. This will open the weekly note for the current week.
-
-To configure the `format`, `folder`, and `template`, you will temporarily need to toggle on "Show weekly numbers" in the settings, but if you toggle it back off, your settings will persist.
+Yes. Enable weekly notes in the settings and open the current one from the command palette with `Calendar Reborn: Open this week's note`.
 
 ## Protips
 
@@ -161,28 +160,29 @@ If you want to style weekends to be distinguishable from weekdays, you can set t
 
 ![how-to-weekend](./images/how-to-weekend.png)
 
-### Weekly Notes (deprecated)
+## Periodic notes
 
-#### Weekly notes have a new home
+Calendar Reborn manages weekly, monthly, quarterly and yearly notes itself, so the [Periodic Notes](https://github.com/liamcain/obsidian-periodic-notes/) plugin is no longer needed. Daily notes follow the settings of Obsidian's core **Daily Notes** plugin.
 
-The weekly note functionality has been split out into its [very own plugin](https://github.com/liamcain/obsidian-periodic-notes/). In the future, the functionality will be removed from the Calendar plugin; so if you're currently using weekly notes, I encourage you to make the switch. Don't worry, the behavior is functionally identical and will still integrate with the calendar view!
+### Migrating from Periodic Notes
 
-This split was inspired by the [One Thing Well](https://en.wikipedia.org/wiki/Unix_philosophy) philosophy. Plugins should be as modular. Some users might want weekly notes and have no use for a calendar view. And vice versa.
-
-If you are currently using weekly notes within the Calendar plugin, the new Periodic Notes plugin will migrate your settings for you automatically.
+If Periodic Notes is enabled when Calendar Reborn first loads, its weekly, monthly, quarterly and yearly settings are imported and a notice tells you that you can disable and uninstall it. Weekly note settings from older versions of the Calendar plugin are carried over too. If Periodic Notes also managed your daily notes, check that the core Daily Notes plugin uses the same format, folder and template.
 
 ### Usage
 
-You can open **weekly notes** in 2 ways: searching `Calendar: open weekly note` in the command palette or by clicking on the week number. Weekly notes can be configured from the Calendar settings. There are 3 settings:
+Enable each kind of note in the settings. Each one has 3 settings:
 
-- **Folder:** The folder that your weekly notes go into. It can be the same or different from your daily notes. By default they are placed in your vault root.
-- **Template:** Configure a template for weekly notes. Weekly notes have slightly different template tags than daily notes. See here for the list of supported [weekly note template tags](#template-tags).
+- **Format:** The date format for the note's filename. Weekly notes default to `gggg-[W]ww`: if you use `DD` in the week format, this will refer to first day of the week (Sunday or Monday, depending on your settings).
+- **Template:** The template for new notes. Weekly notes support extra [template tags](#template-tags).
+- **Folder:** The folder new notes go into. By default they are placed in your vault root.
 
-> Note: The path here won't autocomplete for you, you'll need to enter the full path.
+You can open them:
 
-- **Format:** The date format for the weekly note filename. Defaults to `"gggg-[W]ww`. If you use `DD` in the week format, this will refer to first day of the week (Sunday or Monday, depending on your settings).
+- **Weekly notes:** by clicking the week number (with "Show week number" on).
+- **Monthly / yearly notes:** by clicking the month or the year in the calendar's title.
+- **From the command palette:** `Open this week's note` (and month, quarter, year). While one of these notes is open, `Open next …` and `Open previous …` move to the adjacent period, creating the note if needed.
 
-#### Template Tags
+### Template Tags
 
 | Tag                                                                                    | Description                                                                                                                                                                                                  |
 | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |

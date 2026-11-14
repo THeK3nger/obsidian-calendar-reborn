@@ -2,6 +2,7 @@
   import type { Moment } from "moment";
 
   import Arrow from "./Arrow.svelte";
+  import { isMetaPressed } from "../utils";
 
   interface Props {
     displayedMonth: Moment;
@@ -9,6 +10,8 @@
     resetDisplayedMonth: () => void;
     incrementDisplayedMonth: () => void;
     decrementDisplayedMonth: () => void;
+    onClickMonth?: (date: Moment, isMetaPressed: boolean) => void | Promise<void>;
+    onClickYear?: (date: Moment, isMetaPressed: boolean) => void | Promise<void>;
   }
 
   let {
@@ -16,8 +19,22 @@
     today,
     resetDisplayedMonth,
     incrementDisplayedMonth,
-    decrementDisplayedMonth
+    decrementDisplayedMonth,
+    onClickMonth,
+    onClickYear
   }: Props = $props();
+
+  function onClickPeriod(
+    event: MouseEvent,
+    handler?: (date: Moment, isMetaPressed: boolean) => void | Promise<void>
+  ) {
+    if (!handler) {
+      // Fall through to the title, which resets the displayed month.
+      return;
+    }
+    event.stopPropagation();
+    void handler(displayedMonth, isMetaPressed(event));
+  }
 
   // Get the word 'Today' but localized to the current language
   const todayDisplayStr = $derived(today.calendar().split(/\d|\s/)[0]);
@@ -37,8 +54,19 @@
   <!-- Keyboard users reset the month with the "today" button below. -->
   <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_noninteractive_element_interactions -->
   <h3 class="title" onclick={resetDisplayedMonth}>
-    <span class="month">{displayedMonth.format("MMM")}</span>
-    <span class="year">{displayedMonth.format("YYYY")}</span>
+    <!-- Keyboard users open periodic notes with the plugin's commands. -->
+    <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
+    <span
+      class="month"
+      class:is-clickable={!!onClickMonth}
+      onclick={(e) => onClickPeriod(e, onClickMonth)}
+    >{displayedMonth.format("MMM")}</span>
+    <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
+    <span
+      class="year"
+      class:is-clickable={!!onClickYear}
+      onclick={(e) => onClickPeriod(e, onClickYear)}
+    >{displayedMonth.format("YYYY")}</span>
   </h3>
   <div class="right-nav">
     <Arrow
@@ -93,6 +121,14 @@
 
   .year {
     color: var(--interactive-accent);
+  }
+
+  .is-clickable {
+    cursor: pointer;
+  }
+
+  .is-clickable:hover {
+    text-decoration: underline;
   }
 
   .right-nav {

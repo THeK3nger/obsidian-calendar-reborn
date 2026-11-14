@@ -16,6 +16,8 @@
     onHoverWeek: (date: Moment, targetEl: EventTarget, isMetaPressed?: boolean) => void;
     onClickDay: (date: Moment, isMetaPressed: boolean) => void | Promise<void>;
     onClickWeek: (date: Moment, isMetaPressed: boolean) => void | Promise<void>;
+    onClickMonth: (date: Moment, isMetaPressed: boolean) => void | Promise<void>;
+    onClickYear: (date: Moment, isMetaPressed: boolean) => void | Promise<void>;
     onContextMenuDay: (date: Moment, event: MouseEvent) => void;
     onContextMenuWeek: (date: Moment, event: MouseEvent) => void;
   }
@@ -26,6 +28,8 @@
     onHoverWeek,
     onClickDay,
     onClickWeek,
+    onClickMonth,
+    onClickYear,
     onContextMenuDay,
     onContextMenuWeek
   }: Props = $props();
@@ -75,6 +79,8 @@
   {onContextMenuWeek}
   {onClickDay}
   {onClickWeek}
+  onClickMonth={$settings.monthly.enabled ? onClickMonth : undefined}
+  onClickYear={$settings.yearly.enabled ? onClickYear : undefined}
   bind:displayedMonth
   localeData={today.localeData()}
   selectedId={$activeFile}

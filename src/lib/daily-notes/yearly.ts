@@ -1,9 +1,8 @@
 import { normalizePath, Notice, TFile, TFolder, Vault } from "obsidian";
 
-import { appHasYearlyNotesPluginLoaded } from "./plugins";
 import type { DurationConstructor, Moment } from "./moment-types";
 import { getDateFromFile, getDateUID } from "./parse";
-import { getYearlyNoteSettings } from "./settings";
+import { getYearlyNoteSettings, isPeriodicNoteEnabled } from "./settings";
 import { getNotePath, getTemplateInfo } from "./vault";
 
 export class YearlyNotesFolderMissingError extends Error {}
@@ -82,7 +81,7 @@ export function getYearlyNote(
 export function getAllYearlyNotes(): Record<string, TFile> {
   const yearlyNotes: Record<string, TFile> = {};
 
-  if (!appHasYearlyNotesPluginLoaded()) {
+  if (!isPeriodicNoteEnabled("year")) {
     return yearlyNotes;
   }
   const { vault } = window.app;

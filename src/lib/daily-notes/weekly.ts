@@ -2,7 +2,7 @@ import { normalizePath, Notice, TFile, TFolder, Vault } from "obsidian";
 
 import type { DurationConstructor, Moment } from "./moment-types";
 import { getDateFromFile, getDateUID } from "./parse";
-import { getWeeklyNoteSettings } from "./settings";
+import { getWeeklyNoteSettings, isPeriodicNoteEnabled } from "./settings";
 import { getNotePath, getTemplateInfo } from "./vault";
 
 export class WeeklyNotesFolderMissingError extends Error {}
@@ -104,6 +104,9 @@ export function getWeeklyNote(
 export function getAllWeeklyNotes(): Record<string, TFile> {
   const weeklyNotes: Record<string, TFile> = {};
 
+  if (!isPeriodicNoteEnabled("week")) {
+    return weeklyNotes;
+  }
   const { vault } = window.app;
   const { folder = "" } = getWeeklyNoteSettings() ?? {};
   const weeklyNotesFolder = vault.getAbstractFileByPath(normalizePath(folder));

@@ -9,12 +9,7 @@ declare global {
   }
 }
 
-export {
-  appHasDailyNotesPluginLoaded,
-  appHasMonthlyNotesPluginLoaded,
-  appHasQuarterlyNotesPluginLoaded,
-  appHasYearlyNotesPluginLoaded,
-} from "./plugins";
+export { appHasDailyNotesPluginLoaded } from "./plugins";
 
 export {
   DEFAULT_DAILY_NOTE_FORMAT,
@@ -29,9 +24,14 @@ export { WeeklyNotesFolderMissingError } from "./weekly";
 export { MonthlyNotesFolderMissingError } from "./monthly";
 export { QuarterlyNotesFolderMissingError } from "./quarterly";
 export { YearlyNotesFolderMissingError } from "./yearly";
-export { setCalendarWeeklyNoteSettings } from "./settings";
+export { isPeriodicNoteEnabled, setPeriodicNoteConfig } from "./settings";
 
-import type { IGranularity, IPeriodicNoteSettings } from "./types";
+import type {
+  IGranularity,
+  IPeriodicGranularity,
+  IPeriodicNoteConfig,
+  IPeriodicNoteSettings,
+} from "./types";
 import {
   getDailyNoteSettings,
   getWeeklyNoteSettings,
@@ -52,6 +52,8 @@ import {
   getQuarterlyNote,
 } from "./quarterly";
 import { createYearlyNote, getAllYearlyNotes, getYearlyNote } from "./yearly";
+
+import { getDateUID } from "./parse";
 
 export { getDateUID, getDateFromFile, getDateFromPath } from "./parse";
 export { getTemplateInfo } from "./vault";
@@ -84,7 +86,35 @@ function createPeriodicNote(
   return createFn[granularity](date);
 }
 
-export type { IGranularity, IPeriodicNoteSettings };
+/**
+ * Find every note of the given granularity. Throws if the notes folder is
+ * missing, like the per-granularity functions.
+ */
+function getAllPeriodicNotes(granularity: IGranularity): Record<string, TFile> {
+  const getAllFn: Record<IGranularity, () => Record<string, TFile>> = {
+    day: getAllDailyNotes,
+    week: getAllWeeklyNotes,
+    month: getAllMonthlyNotes,
+    quarter: getAllQuarterlyNotes,
+    year: getAllYearlyNotes,
+  };
+  return getAllFn[granularity]();
+}
+
+function getPeriodicNote(
+  granularity: IGranularity,
+  date: Moment,
+  notes: Record<string, TFile>
+): TFile | null {
+  return notes[getDateUID(date, granularity)] ?? null;
+}
+
+export type {
+  IGranularity,
+  IPeriodicGranularity,
+  IPeriodicNoteConfig,
+  IPeriodicNoteSettings,
+};
 export {
   createDailyNote,
   createMonthlyNote,
@@ -97,10 +127,12 @@ export {
   getAllWeeklyNotes,
   getAllQuarterlyNotes,
   getAllYearlyNotes,
+  getAllPeriodicNotes,
   getDailyNote,
   getDailyNoteSettings,
   getMonthlyNote,
   getMonthlyNoteSettings,
+  getPeriodicNote,
   getPeriodicNoteSettings,
   getWeeklyNote,
   getWeeklyNoteSettings,

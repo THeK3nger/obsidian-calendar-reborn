@@ -21,34 +21,18 @@ declare module "obsidian" {
   }
 
   /**
-   * Periodic-notes-style plugin instance: each granularity has its own
-   * sub-settings, with `enabled` driving which plugin owns the surface.
-   */
-  export interface PeriodicNotesPlugin {
-    settings?: {
-      daily?: IPeriodicNoteSettings & { enabled?: boolean };
-      weekly?: IPeriodicNoteSettings & { enabled?: boolean };
-      monthly?: IPeriodicNoteSettings & { enabled?: boolean };
-      quarterly?: IPeriodicNoteSettings & { enabled?: boolean };
-      yearly?: IPeriodicNoteSettings & { enabled?: boolean };
-    };
-  }
-
-  /**
-   * Obsidian's `app.plugins` registry of community plugins. Returns
-   * different shapes for different plugin IDs, so the overloads make
-   * the call sites type-safe.
+   * Obsidian's `app.plugins` registry of community plugins.
    */
   export interface CommunityPluginManager {
-    getPlugin(id: "periodic-notes"): PeriodicNotesPlugin | undefined;
+    /** IDs of the community plugins the user has enabled. */
+    enabledPlugins: Set<string>;
     getPlugin(id: string): Plugin | undefined;
     plugins: Record<string, Plugin | undefined>;
   }
 
   /**
    * Obsidian's `app.internalPlugins` registry. The library only reads
-   * the "daily-notes" instance options to fall back to the core plugin
-   * when periodic-notes isn't installed.
+   * the "daily-notes" instance options.
    */
   export interface DailyNotesInstance {
     options?: IPeriodicNoteSettings;
@@ -69,14 +53,5 @@ declare module "obsidian" {
     foldManager: FoldManager;
     internalPlugins: InternalPlugins;
     plugins: CommunityPluginManager;
-  }
-
-  export interface Workspace {
-    /** Fired by the periodic-notes plugin when its settings change. */
-    on(
-      name: "periodic-notes:settings-updated",
-      callback: () => unknown,
-      ctx?: unknown
-    ): EventRef;
   }
 }

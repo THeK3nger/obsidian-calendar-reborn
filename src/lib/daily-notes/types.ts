@@ -12,3 +12,10 @@ export interface IPeriodicNoteSettings {
   format?: string;
   template?: string;
 }
+
+/** Every granularity except `day`, which follows the core Daily Notes plugin. */
+export type IPeriodicGranularity = Exclude<IGranularity, "day">;
+
+export interface IPeriodicNoteConfig extends IPeriodicNoteSettings {
+  enabled: boolean;
+}

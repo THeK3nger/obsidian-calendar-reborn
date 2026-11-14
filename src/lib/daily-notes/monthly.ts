@@ -1,9 +1,8 @@
 import { normalizePath, Notice, TFile, TFolder, Vault } from "obsidian";
 
-import { appHasMonthlyNotesPluginLoaded } from "./plugins";
 import type { DurationConstructor, Moment } from "./moment-types";
 import { getDateFromFile, getDateUID } from "./parse";
-import { getMonthlyNoteSettings } from "./settings";
+import { getMonthlyNoteSettings, isPeriodicNoteEnabled } from "./settings";
 import { getNotePath, getTemplateInfo } from "./vault";
 
 export class MonthlyNotesFolderMissingError extends Error {}
@@ -82,7 +81,7 @@ export function getMonthlyNote(
 export function getAllMonthlyNotes(): Record<string, TFile> {
   const monthlyNotes: Record<string, TFile> = {};
 
-  if (!appHasMonthlyNotesPluginLoaded()) {
+  if (!isPeriodicNoteEnabled("month")) {
     return monthlyNotes;
   }
   const { vault } = window.app;

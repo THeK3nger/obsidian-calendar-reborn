@@ -5,15 +5,19 @@ import {
   getDateFromFile,
   getWeeklyNote,
   getWeeklyNoteSettings,
+  isPeriodicNoteEnabled,
 } from "src/lib/daily-notes";
+import type { IGranularity } from "src/lib/daily-notes";
 import { FileView, TFile, ItemView } from "obsidian";
 import type { TAbstractFile } from "obsidian";
 import type { WorkspaceLeaf } from "obsidian";
 import { get } from "svelte/store";
 
 import { TRIGGER_ON_OPEN, VIEW_TYPE_CALENDAR } from "src/constants";
-import { tryToCreateDailyNote } from "src/io/dailyNotes";
-import { tryToCreateWeeklyNote } from "src/io/weeklyNotes";
+import {
+  findPeriodicNote,
+  openOrCreatePeriodicNote,
+} from "src/io/periodicNotes";
 import type { ISettings } from "src/settings";
 
 import Calendar from "./ui/Calendar.svelte";
@@ -39,12 +43,6 @@ export default class CalendarView extends ItemView {
   constructor(leaf: WorkspaceLeaf) {
     super(leaf);
 
-    this.registerEvent(
-      this.app.workspace.on(
-        "periodic-notes:settings-updated",
-        () => this.onNoteSettingsUpdate()
-      )
-    );
     this.registerEvent(
       this.app.vault.on("create", (file) => this.onFileCreated(file))
     );
@@ -105,6 +103,10 @@ export default class CalendarView extends ItemView {
           this.openOrCreateDailyNote(date, inNewSplit),
         onClickWeek: (date: Moment, inNewSplit: boolean) =>
           this.openOrCreateWeeklyNote(date, inNewSplit),
+        onClickMonth: (date: Moment, inNewSplit: boolean) =>
+          this.openOrCreatePeriodicNote("month", date, inNewSplit),
+        onClickYear: (date: Moment, inNewSplit: boolean) =>
+          this.openOrCreatePeriodicNote("year", date, inNewSplit),
         onHoverDay: (date: Moment, targetEl: EventTarget, isMetaPressed?: boolean) =>
           this.onHoverDay(date, targetEl, isMetaPressed),
         onHoverWeek: (date: Moment, targetEl: EventTarget, isMetaPressed?: boolean) =>
@@ -180,12 +182,6 @@ export default class CalendarView extends ItemView {
     });
   }
 
-  private onNoteSettingsUpdate(): void {
-    dailyNotes.reindex();
-    weeklyNotes.reindex();
-    this.updateActiveFile();
-  }
-
   private async onFileDeleted(file: TAbstractFile): Promise<void> {
     if (!(file instanceof TFile)) {
       return;
@@ -242,21 +238,20 @@ export default class CalendarView extends ItemView {
   }
 
   public revealActiveNote(): void {
-    const { moment } = window;
     const file = this.app.workspace.getActiveViewOfType(FileView)?.file;
-
-    if (file) {
-      // Check to see if the active note is a daily-note
-      let date = getDateFromFile(file, "day");
+    if (!file) {
+      return;
+    }
+    const granularities: IGranularity[] = [
+      "day",
+      "week",
+      "month",
+      "quarter",
+      "year",
+    ];
+    for (const granularity of granularities) {
+      const date = getDateFromFile(file, granularity);
       if (date) {
-        this.calendar.setDisplayedMonth(date);
-        return;
-      }
-
-      // Check to see if the active note is a weekly-note
-      const { format } = getWeeklyNoteSettings();
-      date = moment(file.basename, format, true);
-      if (date.isValid()) {
         this.calendar.setDisplayedMonth(date);
         return;
       }
@@ -267,49 +262,46 @@ export default class CalendarView extends ItemView {
     date: Moment,
     inNewSplit: boolean
   ): Promise<void> {
-    const { workspace } = this.app;
-
-    const startOfWeek = date.clone().startOf("week");
-
-    const existingFile = getWeeklyNote(date, get(weeklyNotes));
-
-    if (!existingFile) {
-      // File doesn't exist
-      await tryToCreateWeeklyNote(startOfWeek, inNewSplit, this.settings, (file) => {
-        activeFile.setFile(file);
-      });
+    if (!isPeriodicNoteEnabled("week")) {
       return;
     }
-
-    const leaf = workspace.getLeaf(inNewSplit ? "split" : false);
-    await leaf.openFile(existingFile);
-
-    activeFile.setFile(existingFile);
-    workspace.setActiveLeaf(leaf, { focus: true });
+    await openOrCreatePeriodicNote(
+      "week",
+      date,
+      getWeeklyNote(date, get(weeklyNotes)),
+      inNewSplit,
+      this.settings,
+      (file) => activeFile.setFile(file)
+    );
   }
 
   async openOrCreateDailyNote(
     date: Moment,
     inNewSplit: boolean
   ): Promise<void> {
-    const { workspace } = this.app;
-    const existingFile = getDailyNote(date, get(dailyNotes));
-    if (!existingFile) {
-      // File doesn't exist
-      await tryToCreateDailyNote(
-        date,
-        inNewSplit,
-        this.settings,
-        (dailyNote: TFile) => {
-          activeFile.setFile(dailyNote);
-        }
-      );
-      return;
-    }
+    await openOrCreatePeriodicNote(
+      "day",
+      date,
+      getDailyNote(date, get(dailyNotes)),
+      inNewSplit,
+      this.settings,
+      (file) => activeFile.setFile(file)
+    );
+  }
 
-    const leaf = workspace.getLeaf(inNewSplit ? "split" : false);
-    await leaf.openFile(existingFile, { active: true });
-
-    activeFile.setFile(existingFile);
+  /** For periodicities without a cached index (month, quarter, year). */
+  async openOrCreatePeriodicNote(
+    granularity: IGranularity,
+    date: Moment,
+    inNewSplit: boolean
+  ): Promise<void> {
+    await openOrCreatePeriodicNote(
+      granularity,
+      date,
+      findPeriodicNote(granularity, date),
+      inNewSplit,
+      this.settings,
+      (file) => activeFile.setFile(file)
+    );
   }
 }

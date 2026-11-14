@@ -20,6 +20,9 @@
     onContextMenuWeek: (date: Moment, event: MouseEvent) => void | Promise<void>;
     onClickDay: (date: Moment, isMetaPressed: boolean) => void | Promise<void>;
     onClickWeek: (date: Moment, isMetaPressed: boolean) => void | Promise<void>;
+    // Optional: when set, the month/year in the title open that period's note.
+    onClickMonth?: (date: Moment, isMetaPressed: boolean) => void | Promise<void>;
+    onClickYear?: (date: Moment, isMetaPressed: boolean) => void | Promise<void>;
     // External sources (All optional)
     sources?: ICalendarSource[];
     selectedId: string;
@@ -37,6 +40,8 @@
     onContextMenuWeek,
     onClickDay,
     onClickWeek,
+    onClickMonth,
+    onClickYear,
     sources = [],
     selectedId,
     today = window.moment(),
@@ -70,6 +75,8 @@
     incrementDisplayedMonth={incrementDisplayedMonth}
     decrementDisplayedMonth={decrementDisplayedMonth}
     resetDisplayedMonth={resetDisplayedMonth}
+    {onClickMonth}
+    {onClickYear}
   />
   <table class="calendar">
     <colgroup>

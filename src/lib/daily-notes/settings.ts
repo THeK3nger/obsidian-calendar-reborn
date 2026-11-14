@@ -5,160 +5,84 @@ import {
   DEFAULT_QUARTERLY_NOTE_FORMAT,
   DEFAULT_YEARLY_NOTE_FORMAT,
 } from "./constants";
-import type { IPeriodicNoteSettings } from "./types";
+import type {
+  IPeriodicGranularity,
+  IPeriodicNoteConfig,
+  IPeriodicNoteSettings,
+} from "./types";
 
 function validateString(value: unknown): string {
   return typeof value === "string" ? value : "";
 }
 
-export function shouldUsePeriodicNotesSettings(
-  periodicity: "daily" | "weekly" | "monthly" | "quarterly" | "yearly"
-): boolean {
-  const periodicNotes = window.app.plugins.getPlugin("periodic-notes");
-  return !!periodicNotes?.settings?.[periodicity]?.enabled;
-}
-
 /**
- * Read the user settings for the `daily-notes` plugin
- * to keep behavior of creating a new note in-sync.
+ * Daily notes follow Obsidian's core Daily Notes plugin settings.
  */
 export function getDailyNoteSettings(): IPeriodicNoteSettings {
   try {
-    const { internalPlugins, plugins } = window.app;
-
-    if (shouldUsePeriodicNotesSettings("daily")) {
-      const { format, folder, template } =
-        plugins.getPlugin("periodic-notes")?.settings?.daily || {};
-      return {
-        format: format || DEFAULT_DAILY_NOTE_FORMAT,
-        folder: validateString(folder).trim(),
-        template: validateString(template).trim(),
-      };
-    }
-
     const { folder, format, template } =
-      internalPlugins.getPluginById("daily-notes")?.instance?.options || {};
+      window.app.internalPlugins.getPluginById("daily-notes")?.instance
+        ?.options || {};
     return {
       format: format || DEFAULT_DAILY_NOTE_FORMAT,
       folder: validateString(folder).trim(),
       template: validateString(template).trim(),
     };
   } catch {
-    // Settings are read from other plugins; fall through on unexpected shapes.
+    // Settings are read from the core plugin; fall through on unexpected shapes.
   }
 }
 
 /**
- * The Calendar plugin's own weekly-note settings, used when periodic-notes
- * doesn't manage weekly notes. Kept in sync by the plugin.
+ * Weekly, monthly, quarterly and yearly notes are configured by the plugin
+ * itself and pushed in here whenever its settings change.
  */
-export interface ICalendarWeeklyNoteSettings {
-  weeklyNoteFolder?: string;
-  weeklyNoteFormat?: string;
-  weeklyNoteTemplate?: string;
-}
+let periodicNoteConfig: Partial<
+  Record<IPeriodicGranularity, IPeriodicNoteConfig>
+> = {};
 
-let calendarWeeklyNoteSettings: ICalendarWeeklyNoteSettings = {};
-
-export function setCalendarWeeklyNoteSettings(
-  settings: ICalendarWeeklyNoteSettings
+export function setPeriodicNoteConfig(
+  config: Partial<Record<IPeriodicGranularity, IPeriodicNoteConfig>>
 ): void {
-  calendarWeeklyNoteSettings = settings;
+  periodicNoteConfig = config;
 }
 
-/**
- * Read the user settings for the `weekly-notes` plugin
- * to keep behavior of creating a new note in-sync.
- */
+export function isPeriodicNoteEnabled(
+  granularity: IPeriodicGranularity
+): boolean {
+  return !!periodicNoteConfig[granularity]?.enabled;
+}
+
+const DEFAULT_FORMATS: Record<IPeriodicGranularity, string> = {
+  week: DEFAULT_WEEKLY_NOTE_FORMAT,
+  month: DEFAULT_MONTHLY_NOTE_FORMAT,
+  quarter: DEFAULT_QUARTERLY_NOTE_FORMAT,
+  year: DEFAULT_YEARLY_NOTE_FORMAT,
+};
+
+function getConfiguredNoteSettings(
+  granularity: IPeriodicGranularity
+): IPeriodicNoteSettings {
+  const config = periodicNoteConfig[granularity];
+  return {
+    format: config?.format || DEFAULT_FORMATS[granularity],
+    folder: validateString(config?.folder).trim(),
+    template: validateString(config?.template).trim(),
+  };
+}
+
 export function getWeeklyNoteSettings(): IPeriodicNoteSettings {
-  try {
-    const periodicNotesSettings =
-      window.app.plugins.getPlugin("periodic-notes")?.settings?.weekly;
-
-    if (shouldUsePeriodicNotesSettings("weekly") && periodicNotesSettings) {
-      return {
-        format: periodicNotesSettings.format || DEFAULT_WEEKLY_NOTE_FORMAT,
-        folder: validateString(periodicNotesSettings.folder).trim(),
-        template: validateString(periodicNotesSettings.template).trim(),
-      };
-    }
-
-    const settings = calendarWeeklyNoteSettings;
-    return {
-      format: settings.weeklyNoteFormat || DEFAULT_WEEKLY_NOTE_FORMAT,
-      folder: validateString(settings.weeklyNoteFolder).trim(),
-      template: validateString(settings.weeklyNoteTemplate).trim(),
-    };
-  } catch {
-    // Settings are read from other plugins; fall through on unexpected shapes.
-  }
+  return getConfiguredNoteSettings("week");
 }
 
-/**
- * Read the user settings for the `periodic-notes` plugin
- * to keep behavior of creating a new note in-sync.
- */
 export function getMonthlyNoteSettings(): IPeriodicNoteSettings {
-  const pluginManager = window.app.plugins;
-
-  try {
-    const settings =
-      (shouldUsePeriodicNotesSettings("monthly") &&
-        pluginManager.getPlugin("periodic-notes")?.settings?.monthly) ||
-      {};
-
-    return {
-      format: settings.format || DEFAULT_MONTHLY_NOTE_FORMAT,
-      folder: validateString(settings.folder).trim(),
-      template: validateString(settings.template).trim(),
-    };
-  } catch {
-    // Settings are read from other plugins; fall through on unexpected shapes.
-  }
+  return getConfiguredNoteSettings("month");
 }
 
-/**
- * Read the user settings for the `periodic-notes` plugin
- * to keep behavior of creating a new note in-sync.
- */
 export function getQuarterlyNoteSettings(): IPeriodicNoteSettings {
-  const pluginManager = window.app.plugins;
-
-  try {
-    const settings =
-      (shouldUsePeriodicNotesSettings("quarterly") &&
-        pluginManager.getPlugin("periodic-notes")?.settings?.quarterly) ||
-      {};
-
-    return {
-      format: settings.format || DEFAULT_QUARTERLY_NOTE_FORMAT,
-      folder: validateString(settings.folder).trim(),
-      template: validateString(settings.template).trim(),
-    };
-  } catch {
-    // Settings are read from other plugins; fall through on unexpected shapes.
-  }
+  return getConfiguredNoteSettings("quarter");
 }
 
-/**
- * Read the user settings for the `periodic-notes` plugin
- * to keep behavior of creating a new note in-sync.
- */
 export function getYearlyNoteSettings(): IPeriodicNoteSettings {
-  const pluginManager = window.app.plugins;
-
-  try {
-    const settings =
-      (shouldUsePeriodicNotesSettings("yearly") &&
-        pluginManager.getPlugin("periodic-notes")?.settings?.yearly) ||
-      {};
-
-    return {
-      format: settings.format || DEFAULT_YEARLY_NOTE_FORMAT,
-      folder: validateString(settings.folder).trim(),
-      template: validateString(settings.template).trim(),
-    };
-  } catch {
-    // Settings are read from other plugins; fall through on unexpected shapes.
-  }
+  return getConfiguredNoteSettings("year");
 }
