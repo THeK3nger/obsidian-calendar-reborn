@@ -7,6 +7,7 @@ import {
   getWeeklyNoteSettings,
 } from "src/lib/daily-notes";
 import { FileView, TFile, ItemView } from "obsidian";
+import type { TAbstractFile } from "obsidian";
 import type { OpenViewState, WorkspaceLeaf } from "obsidian";
 import { get } from "svelte/store";
 
@@ -38,32 +39,25 @@ export default class CalendarView extends ItemView {
   constructor(leaf: WorkspaceLeaf) {
     super(leaf);
 
-    this.openOrCreateDailyNote = this.openOrCreateDailyNote.bind(this);
-    this.openOrCreateWeeklyNote = this.openOrCreateWeeklyNote.bind(this);
-
-    this.onNoteSettingsUpdate = this.onNoteSettingsUpdate.bind(this);
-    this.onFileCreated = this.onFileCreated.bind(this);
-    this.onFileDeleted = this.onFileDeleted.bind(this);
-    this.onFileModified = this.onFileModified.bind(this);
-    this.onFileOpen = this.onFileOpen.bind(this);
-
-    this.onHoverDay = this.onHoverDay.bind(this);
-    this.onHoverWeek = this.onHoverWeek.bind(this);
-
-    this.onContextMenuDay = this.onContextMenuDay.bind(this);
-    this.onContextMenuWeek = this.onContextMenuWeek.bind(this);
-
     this.registerEvent(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (<any>this.app.workspace).on(
         "periodic-notes:settings-updated",
-        this.onNoteSettingsUpdate
+        () => this.onNoteSettingsUpdate()
       )
     );
-    this.registerEvent(this.app.vault.on("create", this.onFileCreated));
-    this.registerEvent(this.app.vault.on("delete", this.onFileDeleted));
-    this.registerEvent(this.app.vault.on("modify", this.onFileModified));
-    this.registerEvent(this.app.workspace.on("file-open", this.onFileOpen));
+    this.registerEvent(
+      this.app.vault.on("create", (file) => this.onFileCreated(file))
+    );
+    this.registerEvent(
+      this.app.vault.on("delete", (file) => this.onFileDeleted(file))
+    );
+    this.registerEvent(
+      this.app.vault.on("modify", (file) => this.onFileModified(file))
+    );
+    this.registerEvent(
+      this.app.workspace.on("file-open", (file) => this.onFileOpen(file))
+    );
 
     this.settings = null;
     settings.subscribe((val) => {
@@ -109,12 +103,18 @@ export default class CalendarView extends ItemView {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       target: (this as any).contentEl,
       props: {
-        onClickDay: this.openOrCreateDailyNote,
-        onClickWeek: this.openOrCreateWeeklyNote,
-        onHoverDay: this.onHoverDay,
-        onHoverWeek: this.onHoverWeek,
-        onContextMenuDay: this.onContextMenuDay,
-        onContextMenuWeek: this.onContextMenuWeek,
+        onClickDay: (date: Moment, inNewSplit: boolean) =>
+          this.openOrCreateDailyNote(date, inNewSplit),
+        onClickWeek: (date: Moment, inNewSplit: boolean) =>
+          this.openOrCreateWeeklyNote(date, inNewSplit),
+        onHoverDay: (date: Moment, targetEl: EventTarget, isMetaPressed?: boolean) =>
+          this.onHoverDay(date, targetEl, isMetaPressed),
+        onHoverWeek: (date: Moment, targetEl: EventTarget, isMetaPressed?: boolean) =>
+          this.onHoverWeek(date, targetEl, isMetaPressed),
+        onContextMenuDay: (date: Moment, event: MouseEvent) =>
+          this.onContextMenuDay(date, event),
+        onContextMenuWeek: (date: Moment, event: MouseEvent) =>
+          this.onContextMenuWeek(date, event),
         sources,
       },
     }) as CalendarHandle;
@@ -188,7 +188,10 @@ export default class CalendarView extends ItemView {
     this.updateActiveFile();
   }
 
-  private async onFileDeleted(file: TFile): Promise<void> {
+  private async onFileDeleted(file: TAbstractFile): Promise<void> {
+    if (!(file instanceof TFile)) {
+      return;
+    }
     if (getDateFromFile(file, "day")) {
       dailyNotes.reindex();
       this.updateActiveFile();
@@ -199,14 +202,20 @@ export default class CalendarView extends ItemView {
     }
   }
 
-  private async onFileModified(file: TFile): Promise<void> {
+  private async onFileModified(file: TAbstractFile): Promise<void> {
+    if (!(file instanceof TFile)) {
+      return;
+    }
     const date = getDateFromFile(file, "day") || getDateFromFile(file, "week");
     if (date && this.calendar) {
       this.calendar.tick();
     }
   }
 
-  private onFileCreated(file: TFile): void {
+  private onFileCreated(file: TAbstractFile): void {
+    if (!(file instanceof TFile)) {
+      return;
+    }
     if (this.app.workspace.layoutReady && this.calendar) {
       if (getDateFromFile(file, "day")) {
         dailyNotes.reindex();
@@ -219,7 +228,7 @@ export default class CalendarView extends ItemView {
     }
   }
 
-  public onFileOpen(_file: TFile): void {
+  public onFileOpen(_file: TFile | null): void {
     if (this.app.workspace.layoutReady) {
       this.updateActiveFile();
     }
