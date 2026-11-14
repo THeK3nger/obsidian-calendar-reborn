@@ -1,11 +1,11 @@
 {
-  "id": "calendar",
-  "name": "Calendar",
+  "id": "calendar-reborn",
+  "name": "Calendar Reborn",
   "description": "Calendar view of your daily notes",
-  "version": "1.5.10",
-  "author": "Liam Cain",
-  "authorUrl": "https://github.com/liamcain/",
-  "fundingUrl": "https://www.buymeacoffee.com/liamcain",
+  "version": "2.0.0",
+  "author": "Davide Aversa",
+  "authorUrl": "https://github.com/THeK3nger",
+  "fundingUrl": "https://ko-fi.com/thek3nger",
   "isDesktopOnly": false,
   "minAppVersion": "1.14.0"
 }
