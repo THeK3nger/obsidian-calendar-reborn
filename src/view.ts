@@ -88,11 +88,10 @@ export default class CalendarView extends ItemView {
     return "calendar-with-checkmark";
   }
 
-  onClose(): Promise<void> {
+  async onClose(): Promise<void> {
     if (this.calendar) {
-      unmount(this.calendar);
+      await unmount(this.calendar);
     }
-    return Promise.resolve();
   }
 
   async onOpen(): Promise<void> {
@@ -269,7 +268,7 @@ export default class CalendarView extends ItemView {
 
     if (!existingFile) {
       // File doesn't exist
-      tryToCreateWeeklyNote(startOfWeek, inNewSplit, this.settings, (file) => {
+      await tryToCreateWeeklyNote(startOfWeek, inNewSplit, this.settings, (file) => {
         activeFile.setFile(file);
       });
       return;
@@ -290,7 +289,7 @@ export default class CalendarView extends ItemView {
     const existingFile = getDailyNote(date, get(dailyNotes));
     if (!existingFile) {
       // File doesn't exist
-      tryToCreateDailyNote(
+      await tryToCreateDailyNote(
         date,
         inNewSplit,
         this.settings,

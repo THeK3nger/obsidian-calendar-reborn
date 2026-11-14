@@ -115,7 +115,7 @@ export class CalendarSettingsTab extends PluginSettingTab {
         textfield.inputEl.type = "number";
         textfield.setValue(String(this.plugin.options.wordsPerDot));
         textfield.onChange(async (value) => {
-          this.plugin.writeOptions(() => ({
+          await this.plugin.writeOptions(() => ({
             wordsPerDot: value !== "" ? Number(value) : undefined,
           }));
         });
@@ -141,7 +141,7 @@ export class CalendarSettingsTab extends PluginSettingTab {
         });
         dropdown.setValue(this.plugin.options.weekStart);
         dropdown.onChange(async (value) => {
-          this.plugin.writeOptions(() => ({
+          await this.plugin.writeOptions(() => ({
             weekStart: value as IWeekStartOption,
           }));
         });
@@ -155,7 +155,7 @@ export class CalendarSettingsTab extends PluginSettingTab {
       .addToggle((toggle) => {
         toggle.setValue(this.plugin.options.shouldConfirmBeforeCreate);
         toggle.onChange(async (value) => {
-          this.plugin.writeOptions(() => ({
+          await this.plugin.writeOptions(() => ({
             shouldConfirmBeforeCreate: value,
           }));
         });
@@ -169,7 +169,7 @@ export class CalendarSettingsTab extends PluginSettingTab {
       .addToggle((toggle) => {
         toggle.setValue(this.plugin.options.showWeeklyNote);
         toggle.onChange(async (value) => {
-          this.plugin.writeOptions(() => ({ showWeeklyNote: value }));
+          await this.plugin.writeOptions(() => ({ showWeeklyNote: value }));
           this.display(); // show/hide weekly settings
         });
       });
@@ -183,7 +183,7 @@ export class CalendarSettingsTab extends PluginSettingTab {
         textfield.setValue(this.plugin.options.weeklyNoteFormat);
         textfield.setPlaceholder(DEFAULT_WEEK_FORMAT);
         textfield.onChange(async (value) => {
-          this.plugin.writeOptions(() => ({ weeklyNoteFormat: value }));
+          await this.plugin.writeOptions(() => ({ weeklyNoteFormat: value }));
         });
       });
   }
@@ -197,7 +197,7 @@ export class CalendarSettingsTab extends PluginSettingTab {
       .addText((textfield) => {
         textfield.setValue(this.plugin.options.weeklyNoteTemplate);
         textfield.onChange(async (value) => {
-          this.plugin.writeOptions(() => ({ weeklyNoteTemplate: value }));
+          await this.plugin.writeOptions(() => ({ weeklyNoteTemplate: value }));
         });
       });
   }
@@ -209,7 +209,7 @@ export class CalendarSettingsTab extends PluginSettingTab {
       .addText((textfield) => {
         textfield.setValue(this.plugin.options.weeklyNoteFolder);
         textfield.onChange(async (value) => {
-          this.plugin.writeOptions(() => ({ weeklyNoteFolder: value }));
+          await this.plugin.writeOptions(() => ({ weeklyNoteFolder: value }));
         });
       });
   }
@@ -231,7 +231,7 @@ export class CalendarSettingsTab extends PluginSettingTab {
         });
         dropdown.setValue(this.plugin.options.localeOverride);
         dropdown.onChange(async (value) => {
-          this.plugin.writeOptions(() => ({
+          await this.plugin.writeOptions(() => ({
             localeOverride: value as ILocaleOverride,
           }));
         });

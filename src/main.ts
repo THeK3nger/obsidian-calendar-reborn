@@ -52,7 +52,7 @@ export default class CalendarPlugin extends Plugin {
         if (checking) {
           return !appHasPeriodicNotesPluginLoaded();
         }
-        this.view.openOrCreateWeeklyNote(window.moment(), false);
+        void this.view.openOrCreateWeeklyNote(window.moment(), false);
       },
     });
 
@@ -73,7 +73,7 @@ export default class CalendarPlugin extends Plugin {
     if (this.app.workspace.getLeavesOfType(VIEW_TYPE_CALENDAR).length) {
       return;
     }
-    this.app.workspace.getRightLeaf(false).setViewState({
+    void this.app.workspace.getRightLeaf(false).setViewState({
       type: VIEW_TYPE_CALENDAR,
     });
   }
