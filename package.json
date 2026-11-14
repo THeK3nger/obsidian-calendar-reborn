@@ -7,12 +7,14 @@
   "license": "MIT",
   "scripts": {
     "lint": "svelte-check && eslint .",
+    "dev": "rollup -c -w --environment DEV",
     "build": "npm run lint && rollup -c",
     "version": "node version-bump.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",
     "@rollup/plugin-node-resolve": "^16.0.3",
+    "@rollup/plugin-terser": "^1.0.2",
     "@rollup/plugin-typescript": "^12.3.1",
     "@tsconfig/svelte": "^5.0.9",
     "eslint": "^9.39.5",
