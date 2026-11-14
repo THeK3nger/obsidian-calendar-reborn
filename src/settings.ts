@@ -1,5 +1,5 @@
-import { PluginSettingTab, Setting } from "obsidian";
-import type { App } from "obsidian";
+import { PluginSettingTab } from "obsidian";
+import type { App, SettingDefinitionItem } from "obsidian";
 import { appHasDailyNotesPluginLoaded } from "src/lib/daily-notes";
 import type { ILocaleOverride, IWeekStartOption } from "src/lib/calendar-ui";
 
@@ -20,6 +20,8 @@ export interface ISettings {
 
   localeOverride: ILocaleOverride;
 }
+
+type SettingKey = keyof ISettings;
 
 const weekdays = [
   "sunday",
@@ -50,6 +52,34 @@ export function appHasPeriodicNotesPluginLoaded(): boolean {
   return !!periodicNotes?.settings?.weekly?.enabled;
 }
 
+function weekStartOptions(): Record<string, string> {
+  const { moment } = window;
+  const localizedWeekdays = moment.weekdays();
+  // The bundled week spec is only captured once the calendar view has
+  // mounted; fall back to the current locale before that.
+  const localeWeekStartNum =
+    window._bundledLocaleWeekSpec?.dow ?? moment.localeData().firstDayOfWeek();
+
+  const options: Record<string, string> = {
+    locale: `Locale default (${localizedWeekdays[localeWeekStartNum]})`,
+  };
+  localizedWeekdays.forEach((day, i) => {
+    options[weekdays[i]] = day;
+  });
+  return options;
+}
+
+function localeOptions(): Record<string, string> {
+  const sysLocale = navigator.language?.toLowerCase();
+  const options: Record<string, string> = {
+    "system-default": `Same as system (${sysLocale})`,
+  };
+  window.moment.locales().forEach((locale) => {
+    options[locale] = locale;
+  });
+  return options;
+}
+
 export class CalendarSettingsTab extends PluginSettingTab {
   private plugin: CalendarPlugin;
 
@@ -58,182 +88,129 @@ export class CalendarSettingsTab extends PluginSettingTab {
     this.plugin = plugin;
   }
 
-  display(): void {
-    this.containerEl.empty();
-
-    if (!appHasDailyNotesPluginLoaded()) {
-      this.containerEl.createDiv("settings-banner", (banner) => {
-        banner.createEl("h3", {
-          text: "⚠️ Daily Notes plugin not enabled",
-        });
-        banner.createEl("p", {
-          cls: "setting-item-description",
-          text:
-            "The calendar is best used in conjunction with either the Daily Notes plugin or the Periodic Notes plugin (available in the Community Plugins catalog).",
-        });
-      });
-    }
-
-    this.containerEl.createEl("h3", {
-      text: "General Settings",
-    });
-    this.addDotThresholdSetting();
-    this.addWeekStartSetting();
-    this.addConfirmCreateSetting();
-    this.addShowWeeklyNoteSetting();
-
-    if (
-      this.plugin.options.showWeeklyNote &&
-      !appHasPeriodicNotesPluginLoaded()
-    ) {
-      this.containerEl.createEl("h3", {
-        text: "Weekly Note Settings",
-      });
-      this.containerEl.createEl("p", {
-        cls: "setting-item-description",
-        text:
-          "Note: Weekly Note settings are moving. You are encouraged to install the 'Periodic Notes' plugin to keep the functionality in the future.",
-      });
-      this.addWeeklyNoteFormatSetting();
-      this.addWeeklyNoteTemplateSetting();
-      this.addWeeklyNoteFolderSetting();
-    }
-
-    this.containerEl.createEl("h3", {
-      text: "Advanced Settings",
-    });
-    this.addLocaleOverrideSetting();
+  getControlValue(key: string): unknown {
+    return this.plugin.options[key as SettingKey];
   }
 
-  addDotThresholdSetting(): void {
-    new Setting(this.containerEl)
-      .setName("Words per dot")
-      .setDesc("How many words should be represented by a single dot?")
-      .addText((textfield) => {
-        textfield.setPlaceholder(String(DEFAULT_WORDS_PER_DOT));
-        textfield.inputEl.type = "number";
-        textfield.setValue(String(this.plugin.options.wordsPerDot));
-        textfield.onChange(async (value) => {
-          await this.plugin.writeOptions(() => ({
-            wordsPerDot: value !== "" ? Number(value) : undefined,
-          }));
-        });
-      });
+  async setControlValue(key: string, value: unknown): Promise<void> {
+    await this.plugin.writeOptions(() => ({ [key as SettingKey]: value }));
+    // Other settings' `visible` predicates depend on these values.
+    this.refreshDomState();
   }
 
-  addWeekStartSetting(): void {
-    const { moment } = window;
-
-    const localizedWeekdays = moment.weekdays();
-    const localeWeekStartNum = window._bundledLocaleWeekSpec.dow;
-    const localeWeekStart = moment.weekdays()[localeWeekStartNum];
-
-    new Setting(this.containerEl)
-      .setName("Start week on:")
-      .setDesc(
-        "Choose what day of the week to start. Select 'Locale default' to use the default specified by moment.js"
-      )
-      .addDropdown((dropdown) => {
-        dropdown.addOption("locale", `Locale default (${localeWeekStart})`);
-        localizedWeekdays.forEach((day, i) => {
-          dropdown.addOption(weekdays[i], day);
-        });
-        dropdown.setValue(this.plugin.options.weekStart);
-        dropdown.onChange(async (value) => {
-          await this.plugin.writeOptions(() => ({
-            weekStart: value as IWeekStartOption,
-          }));
-        });
-      });
-  }
-
-  addConfirmCreateSetting(): void {
-    new Setting(this.containerEl)
-      .setName("Confirm before creating new note")
-      .setDesc("Show a confirmation modal before creating a new note")
-      .addToggle((toggle) => {
-        toggle.setValue(this.plugin.options.shouldConfirmBeforeCreate);
-        toggle.onChange(async (value) => {
-          await this.plugin.writeOptions(() => ({
-            shouldConfirmBeforeCreate: value,
-          }));
-        });
-      });
-  }
-
-  addShowWeeklyNoteSetting(): void {
-    new Setting(this.containerEl)
-      .setName("Show week number")
-      .setDesc("Enable this to add a column with the week number")
-      .addToggle((toggle) => {
-        toggle.setValue(this.plugin.options.showWeeklyNote);
-        toggle.onChange(async (value) => {
-          await this.plugin.writeOptions(() => ({ showWeeklyNote: value }));
-          this.display(); // show/hide weekly settings
-        });
-      });
-  }
-
-  addWeeklyNoteFormatSetting(): void {
-    new Setting(this.containerEl)
-      .setName("Weekly note format")
-      .setDesc("For more syntax help, refer to format reference")
-      .addText((textfield) => {
-        textfield.setValue(this.plugin.options.weeklyNoteFormat);
-        textfield.setPlaceholder(DEFAULT_WEEK_FORMAT);
-        textfield.onChange(async (value) => {
-          await this.plugin.writeOptions(() => ({ weeklyNoteFormat: value }));
-        });
-      });
-  }
-
-  addWeeklyNoteTemplateSetting(): void {
-    new Setting(this.containerEl)
-      .setName("Weekly note template")
-      .setDesc(
-        "Choose the file you want to use as the template for your weekly notes"
-      )
-      .addText((textfield) => {
-        textfield.setValue(this.plugin.options.weeklyNoteTemplate);
-        textfield.onChange(async (value) => {
-          await this.plugin.writeOptions(() => ({ weeklyNoteTemplate: value }));
-        });
-      });
-  }
-
-  addWeeklyNoteFolderSetting(): void {
-    new Setting(this.containerEl)
-      .setName("Weekly note folder")
-      .setDesc("New weekly notes will be placed here")
-      .addText((textfield) => {
-        textfield.setValue(this.plugin.options.weeklyNoteFolder);
-        textfield.onChange(async (value) => {
-          await this.plugin.writeOptions(() => ({ weeklyNoteFolder: value }));
-        });
-      });
-  }
-
-  addLocaleOverrideSetting(): void {
-    const { moment } = window;
-
-    const sysLocale = navigator.language?.toLowerCase();
-
-    new Setting(this.containerEl)
-      .setName("Override locale:")
-      .setDesc(
-        "Set this if you want to use a locale different from the default"
-      )
-      .addDropdown((dropdown) => {
-        dropdown.addOption("system-default", `Same as system (${sysLocale})`);
-        moment.locales().forEach((locale) => {
-          dropdown.addOption(locale, locale);
-        });
-        dropdown.setValue(this.plugin.options.localeOverride);
-        dropdown.onChange(async (value) => {
-          await this.plugin.writeOptions(() => ({
-            localeOverride: value as ILocaleOverride,
-          }));
-        });
-      });
+  getSettingDefinitions(): SettingDefinitionItem<SettingKey>[] {
+    return [
+      {
+        type: "group",
+        visible: () => !appHasDailyNotesPluginLoaded(),
+        items: [
+          {
+            name: "⚠️ Daily Notes plugin not enabled",
+            desc: "The calendar is best used in conjunction with either the Daily Notes plugin or the Periodic Notes plugin (available in the Community Plugins catalog).",
+          },
+        ],
+      },
+      {
+        type: "group",
+        items: [
+          {
+            name: "Words per dot",
+            desc: "How many words should be represented by a single dot? Set to 0 to hide word-count dots.",
+            control: {
+              type: "number",
+              key: "wordsPerDot",
+              defaultValue: DEFAULT_WORDS_PER_DOT,
+              placeholder: String(DEFAULT_WORDS_PER_DOT),
+              min: 0,
+              step: 1,
+            },
+          },
+          {
+            name: "Start week on",
+            desc: "Choose what day of the week to start. Select 'Locale default' to use the default specified by moment.js.",
+            control: {
+              type: "dropdown",
+              key: "weekStart",
+              defaultValue: defaultSettings.weekStart,
+              options: weekStartOptions(),
+            },
+          },
+          {
+            name: "Confirm before creating new note",
+            desc: "Show a confirmation modal before creating a new note.",
+            control: {
+              type: "toggle",
+              key: "shouldConfirmBeforeCreate",
+              defaultValue: defaultSettings.shouldConfirmBeforeCreate,
+            },
+          },
+          {
+            name: "Show week number",
+            desc: "Enable this to add a column with the week number.",
+            control: {
+              type: "toggle",
+              key: "showWeeklyNote",
+              defaultValue: defaultSettings.showWeeklyNote,
+            },
+          },
+        ],
+      },
+      {
+        type: "group",
+        heading: "Weekly notes",
+        visible: () =>
+          this.plugin.options.showWeeklyNote &&
+          !appHasPeriodicNotesPluginLoaded(),
+        items: [
+          {
+            name: "Weekly note settings are moving",
+            desc: "You are encouraged to install the 'Periodic Notes' plugin to keep the functionality in the future.",
+            searchable: false,
+          },
+          {
+            name: "Weekly note format",
+            desc: "For more syntax help, refer to format reference.",
+            control: {
+              type: "text",
+              key: "weeklyNoteFormat",
+              placeholder: DEFAULT_WEEK_FORMAT,
+            },
+          },
+          {
+            name: "Weekly note template",
+            desc: "Choose the file you want to use as the template for your weekly notes.",
+            control: {
+              type: "file",
+              key: "weeklyNoteTemplate",
+            },
+          },
+          {
+            name: "Weekly note folder",
+            desc: "New weekly notes will be placed here.",
+            control: {
+              type: "folder",
+              key: "weeklyNoteFolder",
+              includeRoot: true,
+            },
+          },
+        ],
+      },
+      {
+        type: "group",
+        heading: "Advanced",
+        items: [
+          {
+            name: "Override locale",
+            desc: "Set this if you want to use a locale different from the default.",
+            control: {
+              type: "dropdown",
+              key: "localeOverride",
+              defaultValue: defaultSettings.localeOverride,
+              options: localeOptions(),
+            },
+          },
+        ],
+      },
+    ];
   }
 }
