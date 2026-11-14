@@ -40,8 +40,7 @@ export default class CalendarView extends ItemView {
     super(leaf);
 
     this.registerEvent(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (<any>this.app.workspace).on(
+      this.app.workspace.on(
         "periodic-notes:settings-updated",
         () => this.onNoteSettingsUpdate()
       )
@@ -100,8 +99,7 @@ export default class CalendarView extends ItemView {
     this.app.workspace.trigger(TRIGGER_ON_OPEN, sources);
 
     this.calendar = mount(Calendar, {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      target: (this as any).contentEl,
+      target: this.contentEl,
       props: {
         onClickDay: (date: Moment, inNewSplit: boolean) =>
           this.openOrCreateDailyNote(date, inNewSplit),
@@ -309,8 +307,7 @@ export default class CalendarView extends ItemView {
       return;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const mode = (this.app.vault as any).getConfig("defaultViewMode");
+    const mode = this.app.vault.getConfig("defaultViewMode");
     const leaf = workspace.getLeaf(inNewSplit ? "split" : false);
     await leaf.openFile(existingFile, { active: true, mode } as OpenViewState);
 

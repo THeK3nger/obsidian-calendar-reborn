@@ -7,7 +7,8 @@ declare global {
   }
 }
 
-export type ILocaleOverride = "system-default" | string;
+// A moment locale name (e.g. "en-gb"), or "system-default".
+export type ILocaleOverride = string;
 export type IWeekStartOption =
   | "sunday"
   | "monday"
@@ -18,7 +19,7 @@ export type IWeekStartOption =
   | "saturday"
   | "locale";
 
-const langToMomentLocale = {
+const langToMomentLocale: Record<string, string> = {
   en: "en-gb",
   zh: "zh-cn",
   "zh-TW": "zh-tw",
@@ -60,8 +61,11 @@ function overrideGlobalMomentWeekStart(weekStart: IWeekStartOption): void {
   // Save the initial locale weekspec so that we can restore
   // it when toggling between the different options in settings.
   if (!window._bundledLocaleWeekSpec) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    window._bundledLocaleWeekSpec = (<any>moment.localeData())._week;
+    const localeData = moment.localeData();
+    window._bundledLocaleWeekSpec = {
+      dow: localeData.firstDayOfWeek(),
+      doy: localeData.firstDayOfYear(),
+    };
   }
 
   if (weekStart === "locale") {

@@ -86,4 +86,20 @@ declare module "obsidian" {
     internalPlugins: InternalPlugins;
     plugins: CommunityPluginManager;
   }
+
+  /**
+   * Obsidian's internal vault config, e.g. `getConfig("defaultViewMode")`.
+   */
+  export interface Vault {
+    getConfig(key: string): unknown;
+  }
+
+  export interface Workspace {
+    /** Fired by the periodic-notes plugin when its settings change. */
+    on(
+      name: "periodic-notes:settings-updated",
+      callback: () => unknown,
+      ctx?: unknown
+    ): EventRef;
+  }
 }

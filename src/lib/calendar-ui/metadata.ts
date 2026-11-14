@@ -5,7 +5,7 @@ import type { ICalendarSource, IDayMetadata } from "./types";
 async function metadataReducer(
   promisedMetadata: Promise<IDayMetadata>[]
 ): Promise<IDayMetadata> {
-  const meta = {
+  const meta: IDayMetadata = {
     dots: [],
     classes: [],
     dataAttributes: {},

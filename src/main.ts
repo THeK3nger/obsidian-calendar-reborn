@@ -66,7 +66,7 @@ export default class CalendarPlugin extends Plugin {
 
     this.addSettingTab(new CalendarSettingsTab(this.app, this));
 
-    this.app.workspace.onLayoutReady(this.initLeaf.bind(this));
+    this.app.workspace.onLayoutReady(() => this.initLeaf());
   }
 
   initLeaf(): void {
@@ -79,7 +79,7 @@ export default class CalendarPlugin extends Plugin {
   }
 
   async loadOptions(): Promise<void> {
-    const options = await this.loadData();
+    const options = (await this.loadData()) as Partial<ISettings> | null;
     settings.update((old) => {
       return {
         ...old,
