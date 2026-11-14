@@ -227,13 +227,8 @@ export default class CalendarView extends ItemView {
   }
 
   private updateActiveFile(): void {
-    const { view } = this.app.workspace.activeLeaf;
-
-    let file = null;
-    if (view instanceof FileView) {
-      file = view.file;
-    }
-    activeFile.setFile(file);
+    const view = this.app.workspace.getActiveViewOfType(FileView);
+    activeFile.setFile(view?.file ?? null);
 
     if (this.calendar) {
       this.calendar.tick();
@@ -242,11 +237,11 @@ export default class CalendarView extends ItemView {
 
   public revealActiveNote(): void {
     const { moment } = window;
-    const { activeLeaf } = this.app.workspace;
+    const file = this.app.workspace.getActiveViewOfType(FileView)?.file;
 
-    if (activeLeaf.view instanceof FileView) {
+    if (file) {
       // Check to see if the active note is a daily-note
-      let date = getDateFromFile(activeLeaf.view.file, "day");
+      let date = getDateFromFile(file, "day");
       if (date) {
         this.calendar.setDisplayedMonth(date);
         return;
@@ -254,7 +249,7 @@ export default class CalendarView extends ItemView {
 
       // Check to see if the active note is a weekly-note
       const { format } = getWeeklyNoteSettings();
-      date = moment(activeLeaf.view.file.basename, format, true);
+      date = moment(file.basename, format, true);
       if (date.isValid()) {
         this.calendar.setDisplayedMonth(date);
         return;
@@ -280,13 +275,11 @@ export default class CalendarView extends ItemView {
       return;
     }
 
-    const leaf = inNewSplit
-      ? workspace.splitActiveLeaf()
-      : workspace.getUnpinnedLeaf();
+    const leaf = workspace.getLeaf(inNewSplit ? "split" : false);
     await leaf.openFile(existingFile);
 
     activeFile.setFile(existingFile);
-    workspace.setActiveLeaf(leaf, true, true)
+    workspace.setActiveLeaf(leaf, { focus: true });
   }
 
   async openOrCreateDailyNote(
@@ -310,9 +303,7 @@ export default class CalendarView extends ItemView {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const mode = (this.app.vault as any).getConfig("defaultViewMode");
-    const leaf = inNewSplit
-      ? workspace.splitActiveLeaf()
-      : workspace.getUnpinnedLeaf();
+    const leaf = workspace.getLeaf(inNewSplit ? "split" : false);
     await leaf.openFile(existingFile, { active: true, mode } as OpenViewState);
 
     activeFile.setFile(existingFile);
