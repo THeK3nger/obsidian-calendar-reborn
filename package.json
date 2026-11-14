@@ -7,9 +7,7 @@
   "license": "MIT",
   "scripts": {
     "lint": "svelte-check && eslint .",
-    "build": "npm run lint && rollup -c",
-    "test": "jest --passWithNoTests",
-    "test:watch": "jest --passWithNoTests --watch"
+    "build": "npm run lint && rollup -c"
   },
   "dependencies": {
     "obsidian": "^1.14.4",
@@ -22,55 +20,13 @@
     "@rollup/plugin-node-resolve": "16.0.3",
     "@rollup/plugin-typescript": "12.3.1",
     "@tsconfig/svelte": "5.0.9",
-    "@types/jest": "30.0.0",
     "eslint": "9.39.5",
-    "jest": "30.5.2",
-    "jest-environment-jsdom": "^30.5.2",
     "moment": "2.31.0",
     "rollup": "4.68.3",
     "rollup-plugin-svelte": "7.2.3",
     "svelte-check": "^4.7.8",
-    "svelte-jester": "5.0.0",
     "svelte-preprocess": "^6.0.5",
-    "ts-jest": "29.4.15",
     "typescript": "6.0.3",
     "typescript-eslint": "^8.72.2"
-  },
-  "jest": {
-    "moduleNameMapper": {
-      "src/(.*)": "<rootDir>/src/$1"
-    },
-    "transform": {
-      "^.+\\.svelte$": [
-        "svelte-jester",
-        {
-          "preprocess": true
-        }
-      ],
-      "^.+\\.ts$": [
-        "ts-jest",
-        {
-          "tsconfig": {
-            "module": "commonjs",
-            "moduleResolution": "node10",
-            "verbatimModuleSyntax": false,
-            "esModuleInterop": true,
-            "strict": false,
-            "skipLibCheck": true,
-            "types": [
-              "node",
-              "jest"
-            ],
-            "ignoreDeprecations": "6.0"
-          }
-        }
-      ]
-    },
-    "moduleFileExtensions": [
-      "js",
-      "ts",
-      "svelte"
-    ],
-    "testEnvironment": "jsdom"
   }
 }
