@@ -3,7 +3,7 @@ import type { TFile } from "obsidian";
 import {
   createWeeklyNote,
   getWeeklyNoteSettings,
-} from "obsidian-daily-notes-interface";
+} from "src/lib/daily-notes";
 
 import type { ISettings } from "src/settings";
 import { createConfirmationDialog } from "src/ui/modal";

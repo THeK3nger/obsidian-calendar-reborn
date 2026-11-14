@@ -5,8 +5,8 @@
   import {
     Calendar as CalendarBase,
     configureGlobalMomentLocale,
-  } from "obsidian-calendar-ui";
-  import type { ICalendarSource } from "obsidian-calendar-ui";
+  } from "src/lib/calendar-ui";
+  import type { ICalendarSource } from "src/lib/calendar-ui";
   import { onDestroy } from "svelte";
 
   import type { ISettings } from "src/settings";
@@ -38,17 +38,6 @@
   ) => void | Promise<void>;
   export let onContextMenuDay: (date: Moment, event: MouseEvent) => void;
   export let onContextMenuWeek: (date: Moment, event: MouseEvent) => void;
-
-  // The library's typings declare these handlers as returning boolean, but the
-  // return value is never used.
-  const contextMenuDay = (date: Moment, event: MouseEvent): boolean => {
-    onContextMenuDay(date, event);
-    return true;
-  };
-  const contextMenuWeek = (date: Moment, event: MouseEvent): boolean => {
-    onContextMenuWeek(date, event);
-    return true;
-  };
 
   export function tick() {
     today = window.moment();
@@ -83,8 +72,8 @@
   {today}
   {onHoverDay}
   {onHoverWeek}
-  onContextMenuDay={contextMenuDay}
-  onContextMenuWeek={contextMenuWeek}
+  {onContextMenuDay}
+  {onContextMenuWeek}
   {onClickDay}
   {onClickWeek}
   bind:displayedMonth

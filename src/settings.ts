@@ -1,6 +1,6 @@
 import { App, PluginSettingTab, Setting } from "obsidian";
-import { appHasDailyNotesPluginLoaded } from "obsidian-daily-notes-interface";
-import type { ILocaleOverride, IWeekStartOption } from "obsidian-calendar-ui";
+import { appHasDailyNotesPluginLoaded } from "src/lib/daily-notes";
+import type { ILocaleOverride, IWeekStartOption } from "src/lib/calendar-ui";
 
 import { DEFAULT_WEEK_FORMAT, DEFAULT_WORDS_PER_DOT } from "src/constants";
 

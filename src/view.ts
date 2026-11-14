@@ -5,7 +5,7 @@ import {
   getDateFromFile,
   getWeeklyNote,
   getWeeklyNoteSettings,
-} from "obsidian-daily-notes-interface";
+} from "src/lib/daily-notes";
 import { FileView, TFile, ItemView, WorkspaceLeaf } from "obsidian";
 import type { OpenViewState } from "obsidian";
 import { get } from "svelte/store";

@@ -13,8 +13,6 @@
   },
   "dependencies": {
     "obsidian": "^1.14.4",
-    "obsidian-calendar-ui": "0.3.12",
-    "obsidian-daily-notes-interface": "0.9.5",
     "svelte": "3.59.2",
     "tslib": "2.9.1"
   },
@@ -27,6 +25,7 @@
     "@types/jest": "30.0.0",
     "eslint": "9.39.5",
     "jest": "30.5.2",
+    "jest-environment-jsdom": "^30.5.2",
     "moment": "2.31.0",
     "rollup": "4.68.3",
     "rollup-plugin-svelte": "7.2.3",
@@ -48,12 +47,30 @@
           "preprocess": true
         }
       ],
-      "^.+\\.ts$": "ts-jest"
+      "^.+\\.ts$": [
+        "ts-jest",
+        {
+          "tsconfig": {
+            "module": "commonjs",
+            "moduleResolution": "node10",
+            "verbatimModuleSyntax": false,
+            "esModuleInterop": true,
+            "strict": false,
+            "skipLibCheck": true,
+            "baseUrl": ".",
+            "types": [
+              "node",
+              "jest"
+            ]
+          }
+        }
+      ]
     },
     "moduleFileExtensions": [
       "js",
       "ts",
       "svelte"
-    ]
+    ],
+    "testEnvironment": "jsdom"
   }
 }
