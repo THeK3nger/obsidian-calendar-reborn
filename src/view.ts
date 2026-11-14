@@ -8,7 +8,7 @@ import {
 } from "src/lib/daily-notes";
 import { FileView, TFile, ItemView } from "obsidian";
 import type { TAbstractFile } from "obsidian";
-import type { OpenViewState, WorkspaceLeaf } from "obsidian";
+import type { WorkspaceLeaf } from "obsidian";
 import { get } from "svelte/store";
 
 import { TRIGGER_ON_OPEN, VIEW_TYPE_CALENDAR } from "src/constants";
@@ -307,9 +307,8 @@ export default class CalendarView extends ItemView {
       return;
     }
 
-    const mode = this.app.vault.getConfig("defaultViewMode");
     const leaf = workspace.getLeaf(inNewSplit ? "split" : false);
-    await leaf.openFile(existingFile, { active: true, mode } as OpenViewState);
+    await leaf.openFile(existingFile, { active: true });
 
     activeFile.setFile(existingFile);
   }

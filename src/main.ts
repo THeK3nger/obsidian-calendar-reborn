@@ -1,6 +1,7 @@
 import { Plugin } from "obsidian";
 import type { WorkspaceLeaf } from "obsidian";
 
+import { setCalendarWeeklyNoteSettings } from "./lib/daily-notes";
 import { VIEW_TYPE_CALENDAR } from "./constants";
 import { settings } from "./ui/stores";
 import {
@@ -24,6 +25,7 @@ export default class CalendarPlugin extends Plugin {
     this.register(
       settings.subscribe((value) => {
         this.options = value;
+        setCalendarWeeklyNoteSettings(value);
       })
     );
 

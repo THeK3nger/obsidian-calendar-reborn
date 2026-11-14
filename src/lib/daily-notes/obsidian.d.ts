@@ -35,28 +35,12 @@ declare module "obsidian" {
   }
 
   /**
-   * The Calendar community plugin's weekly-note settings live on its
-   * `options` property. The library reads them as a fallback for users
-   * who haven't moved to periodic-notes yet.
-   */
-  export interface CalendarPlugin {
-    options?: {
-      weeklyNoteFolder?: string;
-      weeklyNoteFormat?: string;
-      weeklyNoteTemplate?: string;
-    };
-  }
-
-  type KnownCommunityPlugin = "periodic-notes" | "calendar";
-
-  /**
    * Obsidian's `app.plugins` registry of community plugins. Returns
    * different shapes for different plugin IDs, so the overloads make
    * the call sites type-safe.
    */
   export interface CommunityPluginManager {
     getPlugin(id: "periodic-notes"): PeriodicNotesPlugin | undefined;
-    getPlugin(id: "calendar"): CalendarPlugin | undefined;
     getPlugin(id: string): Plugin | undefined;
     plugins: Record<string, Plugin | undefined>;
   }
@@ -85,13 +69,6 @@ declare module "obsidian" {
     foldManager: FoldManager;
     internalPlugins: InternalPlugins;
     plugins: CommunityPluginManager;
-  }
-
-  /**
-   * Obsidian's internal vault config, e.g. `getConfig("defaultViewMode")`.
-   */
-  export interface Vault {
-    getConfig(key: string): unknown;
   }
 
   export interface Workspace {

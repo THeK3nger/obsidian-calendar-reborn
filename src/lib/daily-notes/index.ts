@@ -11,7 +11,6 @@ declare global {
 
 export {
   appHasDailyNotesPluginLoaded,
-  appHasWeeklyNotesPluginLoaded,
   appHasMonthlyNotesPluginLoaded,
   appHasQuarterlyNotesPluginLoaded,
   appHasYearlyNotesPluginLoaded,
@@ -30,6 +29,7 @@ export { WeeklyNotesFolderMissingError } from "./weekly";
 export { MonthlyNotesFolderMissingError } from "./monthly";
 export { QuarterlyNotesFolderMissingError } from "./quarterly";
 export { YearlyNotesFolderMissingError } from "./yearly";
+export { setCalendarWeeklyNoteSettings } from "./settings";
 
 import type { IGranularity, IPeriodicNoteSettings } from "./types";
 import {

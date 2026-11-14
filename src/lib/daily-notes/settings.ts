@@ -49,16 +49,31 @@ export function getDailyNoteSettings(): IPeriodicNoteSettings {
 }
 
 /**
+ * The Calendar plugin's own weekly-note settings, used when periodic-notes
+ * doesn't manage weekly notes. Kept in sync by the plugin.
+ */
+export interface ICalendarWeeklyNoteSettings {
+  weeklyNoteFolder?: string;
+  weeklyNoteFormat?: string;
+  weeklyNoteTemplate?: string;
+}
+
+let calendarWeeklyNoteSettings: ICalendarWeeklyNoteSettings = {};
+
+export function setCalendarWeeklyNoteSettings(
+  settings: ICalendarWeeklyNoteSettings
+): void {
+  calendarWeeklyNoteSettings = settings;
+}
+
+/**
  * Read the user settings for the `weekly-notes` plugin
  * to keep behavior of creating a new note in-sync.
  */
 export function getWeeklyNoteSettings(): IPeriodicNoteSettings {
   try {
-    const pluginManager = window.app.plugins;
-
-    const calendarSettings = pluginManager.getPlugin("calendar")?.options;
     const periodicNotesSettings =
-      pluginManager.getPlugin("periodic-notes")?.settings?.weekly;
+      window.app.plugins.getPlugin("periodic-notes")?.settings?.weekly;
 
     if (shouldUsePeriodicNotesSettings("weekly") && periodicNotesSettings) {
       return {
@@ -68,7 +83,7 @@ export function getWeeklyNoteSettings(): IPeriodicNoteSettings {
       };
     }
 
-    const settings = calendarSettings || {};
+    const settings = calendarWeeklyNoteSettings;
     return {
       format: settings.weeklyNoteFormat || DEFAULT_WEEKLY_NOTE_FORMAT,
       folder: validateString(settings.weeklyNoteFolder).trim(),
