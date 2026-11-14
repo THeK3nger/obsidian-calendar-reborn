@@ -24,10 +24,13 @@ import {
   tasksSource,
   wordCountSource,
 } from "./ui/sources";
-import { mount } from "svelte";
+import { mount, unmount } from "svelte";
 
 export default class CalendarView extends ItemView {
-  private calendar: Calendar;
+  private calendar: {
+    tick(): void;
+    setDisplayedMonth(date: Moment): void;
+  };
   private settings: ISettings;
 
   constructor(leaf: WorkspaceLeaf) {
@@ -85,7 +88,7 @@ export default class CalendarView extends ItemView {
 
   onClose(): Promise<void> {
     if (this.calendar) {
-      this.calendar.$destroy();
+      unmount(this.calendar);
     }
     return Promise.resolve();
   }
@@ -102,18 +105,18 @@ export default class CalendarView extends ItemView {
     this.app.workspace.trigger(TRIGGER_ON_OPEN, sources);
 
     this.calendar = mount(Calendar, {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          target: (this as any).contentEl,
-          props: {
-            onClickDay: this.openOrCreateDailyNote,
-            onClickWeek: this.openOrCreateWeeklyNote,
-            onHoverDay: this.onHoverDay,
-            onHoverWeek: this.onHoverWeek,
-            onContextMenuDay: this.onContextMenuDay,
-            onContextMenuWeek: this.onContextMenuWeek,
-            sources,
-          },
-        });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      target: (this as any).contentEl,
+      props: {
+        onClickDay: this.openOrCreateDailyNote,
+        onClickWeek: this.openOrCreateWeeklyNote,
+        onHoverDay: this.onHoverDay,
+        onHoverWeek: this.onHoverWeek,
+        onContextMenuDay: this.onContextMenuDay,
+        onContextMenuWeek: this.onContextMenuWeek,
+        sources,
+      },
+    });
   }
 
   onHoverDay(
@@ -243,7 +246,7 @@ export default class CalendarView extends ItemView {
       // Check to see if the active note is a daily-note
       let date = getDateFromFile(activeLeaf.view.file, "day");
       if (date) {
-        this.calendar.$set({ displayedMonth: date });
+        this.calendar.setDisplayedMonth(date);
         return;
       }
 
@@ -251,7 +254,7 @@ export default class CalendarView extends ItemView {
       const { format } = getWeeklyNoteSettings();
       date = moment(activeLeaf.view.file.basename, format, true);
       if (date.isValid()) {
-        this.calendar.$set({ displayedMonth: date });
+        this.calendar.setDisplayedMonth(date);
         return;
       }
     }

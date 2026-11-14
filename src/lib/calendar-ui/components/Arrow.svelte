@@ -13,10 +13,10 @@
 
 <div
   class="arrow"
-  class:is-mobile="{isMobile}"
-  class:right="{direction === 'right'}"
+  class:is-mobile={isMobile}
+  class:right={direction === 'right'}
   onclick={onClick}
-  aria-label="{tooltip}"
+  aria-label={tooltip}
 >
   <svg
     focusable="false"

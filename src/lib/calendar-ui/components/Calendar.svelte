@@ -1,5 +1,3 @@
-<svelte:options immutable />
-
 <script lang="ts">
   import type { Locale, Moment } from "moment";
 
@@ -10,31 +8,14 @@
   import type { ICalendarSource, IMonth } from "../types";
   import { getDaysOfWeek, getMonth, isWeekend } from "../utils";
 
-  
-
-  
-
-  
-
-  
-
-  
   interface Props {
     // Localization
     localeData: Locale;
     // Settings
     showWeekNums?: boolean;
     // Event Handlers
-    onHoverDay: (
-    date: Moment,
-    targetEl: EventTarget,
-    isMetaPressed: boolean
-  ) => void | Promise<void>;
-    onHoverWeek: (
-    date: Moment,
-    targetEl: EventTarget,
-    isMetaPressed: boolean
-  ) => void | Promise<void>;
+    onHoverDay: (date: Moment, targetEl: EventTarget, isMetaPressed: boolean) => void | Promise<void>;
+    onHoverWeek: (date: Moment, targetEl: EventTarget, isMetaPressed: boolean) => void | Promise<void>;
     onContextMenuDay: (date: Moment, event: MouseEvent) => void | Promise<void>;
     onContextMenuWeek: (date: Moment, event: MouseEvent) => void | Promise<void>;
     onClickDay: (date: Moment, isMetaPressed: boolean) => void | Promise<void>;
@@ -44,7 +25,7 @@
     selectedId: string;
     // Override-able local state
     today?: Moment;
-    displayedMonth?: any;
+    displayedMonth?: Moment;
   }
 
   let {
@@ -68,9 +49,6 @@
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let isMobile = (window.app as any).isMobile;
 
-  
-  
-
   // Exports
   export function incrementDisplayedMonth() {
     displayedMonth = displayedMonth.clone().add(1, "month");
@@ -85,13 +63,13 @@
   }
 </script>
 
-<div id="calendar-container" class="container" class:is-mobile="{isMobile}">
+<div id="calendar-container" class="container" class:is-mobile={isMobile}>
   <Nav
-    today="{today}"
-    displayedMonth="{displayedMonth}"
-    incrementDisplayedMonth="{incrementDisplayedMonth}"
-    decrementDisplayedMonth="{decrementDisplayedMonth}"
-    resetDisplayedMonth="{resetDisplayedMonth}"
+    today={today}
+    displayedMonth={displayedMonth}
+    incrementDisplayedMonth={incrementDisplayedMonth}
+    decrementDisplayedMonth={decrementDisplayedMonth}
+    resetDisplayedMonth={resetDisplayedMonth}
   />
   <table class="calendar">
     <colgroup>
@@ -99,7 +77,7 @@
         <col />
       {/if}
       {#each month[1].days as date}
-        <col class:weekend="{isWeekend(date)}" />
+        <col class:weekend={isWeekend(date)} />
       {/each}
     </colgroup>
     <thead>
@@ -118,23 +96,23 @@
           {#if showWeekNums}
             <WeekNum
               {...week}
-              metadata="{getWeeklyMetadata(sources, week.days[0], today)}"
-              onClick="{onClickWeek}"
-              onContextMenu="{onContextMenuWeek}"
-              onHover="{onHoverWeek}"
-              selectedId="{selectedId}"
+              metadata={getWeeklyMetadata(sources, week.days[0], today)}
+              onClick={onClickWeek}
+              onContextMenu={onContextMenuWeek}
+              onHover={onHoverWeek}
+              selectedId={selectedId}
             />
           {/if}
           {#each week.days as day (day.format())}
             <Day
-              date="{day}"
-              today="{today}"
-              displayedMonth="{displayedMonth}"
-              onClick="{onClickDay}"
-              onContextMenu="{onContextMenuDay}"
-              onHover="{onHoverDay}"
-              metadata="{getDailyMetadata(sources, day, today)}"
-              selectedId="{selectedId}"
+              date={day}
+              today={today}
+              displayedMonth={displayedMonth}
+              onClick={onClickDay}
+              onContextMenu={onContextMenuDay}
+              onHover={onHoverDay}
+              metadata={getDailyMetadata(sources, day, today)}
+              selectedId={selectedId}
             />
           {/each}
         </tr>

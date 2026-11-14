@@ -1,8 +1,4 @@
-<svelte:options immutable />
-
 <script lang="ts">
-  import { run } from 'svelte/legacy';
-
   import type { Moment } from "moment";
   import {
     Calendar as CalendarBase,
@@ -14,36 +10,17 @@
   import type { ISettings } from "src/settings";
   import { activeFile, dailyNotes, settings, weeklyNotes } from "./stores";
 
-  let today: Moment = $state();
-
-
   interface Props {
-    displayedMonth?: Moment;
     sources: ICalendarSource[];
-    onHoverDay: (
-    date: Moment,
-    targetEl: EventTarget,
-    isMetaPressed?: boolean
-  ) => void;
-    onHoverWeek: (
-    date: Moment,
-    targetEl: EventTarget,
-    isMetaPressed?: boolean
-  ) => void;
-    onClickDay: (
-    date: Moment,
-    isMetaPressed: boolean
-  ) => void | Promise<void>;
-    onClickWeek: (
-    date: Moment,
-    isMetaPressed: boolean
-  ) => void | Promise<void>;
+    onHoverDay: (date: Moment, targetEl: EventTarget, isMetaPressed?: boolean) => void;
+    onHoverWeek: (date: Moment, targetEl: EventTarget, isMetaPressed?: boolean) => void;
+    onClickDay: (date: Moment, isMetaPressed: boolean) => void | Promise<void>;
+    onClickWeek: (date: Moment, isMetaPressed: boolean) => void | Promise<void>;
     onContextMenuDay: (date: Moment, event: MouseEvent) => void;
     onContextMenuWeek: (date: Moment, event: MouseEvent) => void;
   }
 
   let {
-    displayedMonth = $bindable(today),
     sources,
     onHoverDay,
     onHoverWeek,
@@ -53,15 +30,23 @@
     onContextMenuWeek
   }: Props = $props();
 
-  export function tick() {
-    today = window.moment();
-  }
-
   function getToday(settings: ISettings) {
     configureGlobalMomentLocale(settings.localeOverride, settings.weekStart);
     dailyNotes.reindex();
     weeklyNotes.reindex();
     return window.moment();
+  }
+
+  // Re-derived whenever the settings change; `tick()` can override it in between.
+  let today: Moment = $derived(getToday($settings));
+  let displayedMonth: Moment = $state(window.moment());
+
+  export function tick() {
+    today = window.moment();
+  }
+
+  export function setDisplayedMonth(date: Moment) {
+    displayedMonth = date;
   }
 
   // 1 minute heartbeat to keep `today` reflecting the current day
@@ -78,9 +63,6 @@
 
   onDestroy(() => {
     clearInterval(heartbeat);
-  });
-  run(() => {
-    today = getToday($settings);
   });
 </script>
 

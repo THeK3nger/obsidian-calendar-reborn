@@ -1,5 +1,3 @@
-<svelte:options immutable />
-
 <script lang="ts">
   import type { Moment } from "moment";
   import { getDateUID } from "src/lib/daily-notes";
@@ -9,18 +7,11 @@
   import type { IDayMetadata } from "../types";
   import { isMetaPressed } from "../utils";
 
-  
-
-  
   interface Props {
     // Properties
     date: Moment;
     metadata: Promise<IDayMetadata> | null;
-    onHover: (
-    date: Moment,
-    targetEl: EventTarget,
-    isMetaPressed: boolean
-  ) => void | Promise<void>;
+    onHover: (date: Moment, targetEl: EventTarget, isMetaPressed: boolean) => void | Promise<void>;
     onClick: (date: Moment, isMetaPressed: boolean) => void | Promise<void>;
     onContextMenu: (date: Moment, event: MouseEvent) => void | Promise<void>;
     // Global state
@@ -42,13 +33,13 @@
 </script>
 
 <td>
-  <MetadataResolver metadata="{metadata}" >
+  <MetadataResolver metadata={metadata} >
     {#snippet children({ metadata })}
         <div
         class="{`day ${metadata.classes.join(' ')}`}"
-        class:active="{selectedId === getDateUID(date, 'day')}"
-        class:adjacent-month="{!date.isSame(displayedMonth, 'month')}"
-        class:today="{date.isSame(today, 'day')}"
+        class:active={selectedId === getDateUID(date, 'day')}
+        class:adjacent-month={!date.isSame(displayedMonth, 'month')}
+        class:today={date.isSame(today, 'day')}
         onclick={onClick && ((e) => onClick(date, isMetaPressed(e)))}
         oncontextmenu={onContextMenu && ((e) => onContextMenu(date, e))}
         onpointerover={onHover &&

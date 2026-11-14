@@ -3,7 +3,6 @@
 
   import Arrow from "./Arrow.svelte";
 
-
   interface Props {
     displayedMonth: Moment;
     today: Moment;
@@ -21,13 +20,13 @@
   }: Props = $props();
 
   // Get the word 'Today' but localized to the current language
-  const todayDisplayStr = today.calendar().split(/\d|\s/)[0];
+  const todayDisplayStr = $derived(today.calendar().split(/\d|\s/)[0]);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let isMobile = (window.app as any).isMobile;
 </script>
 
-<div class="nav" class:is-mobile="{isMobile}">
+<div class="nav" class:is-mobile={isMobile}>
   <h3 class="title" onclick={resetDisplayedMonth}>
     <span class="month">{displayedMonth.format("MMM")}</span>
     <span class="year">{displayedMonth.format("YYYY")}</span>
@@ -35,7 +34,7 @@
   <div class="right-nav">
     <Arrow
       direction="left"
-      onClick="{decrementDisplayedMonth}"
+      onClick={decrementDisplayedMonth}
       tooltip="Previous Month"
     />
     <div class="reset-button" onclick={resetDisplayedMonth}>
@@ -43,7 +42,7 @@
     </div>
     <Arrow
       direction="right"
-      onClick="{incrementDisplayedMonth}"
+      onClick={incrementDisplayedMonth}
       tooltip="Next Month"
     />
   </div>

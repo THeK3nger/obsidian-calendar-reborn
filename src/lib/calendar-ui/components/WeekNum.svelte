@@ -1,5 +1,3 @@
-<svelte:options immutable />
-
 <script lang="ts">
   import type { Moment } from "moment";
   import { getDateUID } from "src/lib/daily-notes";
@@ -9,22 +7,13 @@
   import type { IDayMetadata } from "../types";
   import { getStartOfWeek, isMetaPressed } from "../utils";
 
-  
-
-  
-
-  
   interface Props {
     // Properties
     weekNum: number;
     days: Moment[];
     metadata: Promise<IDayMetadata> | null;
     // Event handlers
-    onHover: (
-    date: Moment,
-    targetEl: EventTarget,
-    isMetaPressed: boolean
-  ) => void | Promise<void>;
+    onHover: (date: Moment, targetEl: EventTarget, isMetaPressed: boolean) => void | Promise<void>;
     onClick: (date: Moment, isMetaPressed: boolean) => void | Promise<void>;
     onContextMenu: (date: Moment, event: MouseEvent) => void | Promise<void>;
     // Global state;
@@ -46,11 +35,11 @@
 </script>
 
 <td>
-  <MetadataResolver metadata="{metadata}" >
+  <MetadataResolver metadata={metadata} >
     {#snippet children({ metadata })}
         <div
         class="{`week-num ${metadata.classes.join(' ')}`}"
-        class:active="{selectedId === getDateUID(days[0], 'week')}"
+        class:active={selectedId === getDateUID(days[0], 'week')}
         onclick={onClick && ((e) => onClick(startOfWeek, isMetaPressed(e)))}
         oncontextmenu={onContextMenu && ((e) => onContextMenu(days[0], e))}
         onpointerover={onHover &&
