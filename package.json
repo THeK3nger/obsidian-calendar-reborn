@@ -7,7 +7,8 @@
   "license": "MIT",
   "scripts": {
     "lint": "svelte-check && eslint .",
-    "build": "npm run lint && rollup -c"
+    "build": "npm run lint && rollup -c",
+    "version": "node version-bump.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",
@@ -15,6 +16,7 @@
     "@rollup/plugin-typescript": "^12.3.1",
     "@tsconfig/svelte": "^5.0.9",
     "eslint": "^9.39.5",
+    "eslint-plugin-obsidianmd": "^0.5.1",
     "obsidian": "^1.14.4",
     "rollup": "^4.68.3",
     "rollup-plugin-svelte": "^7.2.3",
