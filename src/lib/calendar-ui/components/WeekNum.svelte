@@ -9,45 +9,62 @@
   import type { IDayMetadata } from "../types";
   import { getStartOfWeek, isMetaPressed } from "../utils";
 
-  // Properties
-  export let weekNum: number;
-  export let days: Moment[];
-  export let metadata: Promise<IDayMetadata> | null;
+  
 
-  // Event handlers
-  export let onHover: (
+  
+
+  
+  interface Props {
+    // Properties
+    weekNum: number;
+    days: Moment[];
+    metadata: Promise<IDayMetadata> | null;
+    // Event handlers
+    onHover: (
     date: Moment,
     targetEl: EventTarget,
     isMetaPressed: boolean
   ) => void | Promise<void>;
-  export let onClick: (date: Moment, isMetaPressed: boolean) => void | Promise<void>;
-  export let onContextMenu: (date: Moment, event: MouseEvent) => void | Promise<void>;
+    onClick: (date: Moment, isMetaPressed: boolean) => void | Promise<void>;
+    onContextMenu: (date: Moment, event: MouseEvent) => void | Promise<void>;
+    // Global state;
+    selectedId?: string;
+  }
 
-  // Global state;
-  export let selectedId: string = null;
+  let {
+    weekNum,
+    days,
+    metadata,
+    onHover,
+    onClick,
+    onContextMenu,
+    selectedId = null
+  }: Props = $props();
 
-  let startOfWeek: Moment;
-  $: startOfWeek = getStartOfWeek(days);
+  let startOfWeek: Moment = $derived(getStartOfWeek(days));
+  
 </script>
 
 <td>
-  <MetadataResolver metadata="{metadata}" let:metadata>
-    <div
-      class="{`week-num ${metadata.classes.join(' ')}`}"
-      class:active="{selectedId === getDateUID(days[0], 'week')}"
-      on:click="{onClick && ((e) => onClick(startOfWeek, isMetaPressed(e)))}"
-      on:contextmenu="{onContextMenu && ((e) => onContextMenu(days[0], e))}"
-      on:pointerover="{onHover &&
-        ((e) => onHover(startOfWeek, e.target, isMetaPressed(e)))}"
-    >
-      {weekNum}
-      <div class="dot-container">
-        {#each metadata.dots as dot}
-          <Dot {...dot} />
-        {/each}
+  <MetadataResolver metadata="{metadata}" >
+    {#snippet children({ metadata })}
+        <div
+        class="{`week-num ${metadata.classes.join(' ')}`}"
+        class:active="{selectedId === getDateUID(days[0], 'week')}"
+        onclick={onClick && ((e) => onClick(startOfWeek, isMetaPressed(e)))}
+        oncontextmenu={onContextMenu && ((e) => onContextMenu(days[0], e))}
+        onpointerover={onHover &&
+          ((e) => onHover(startOfWeek, e.target, isMetaPressed(e)))}
+      >
+        {weekNum}
+        <div class="dot-container">
+          {#each metadata.dots as dot}
+            <Dot {...dot} />
+          {/each}
+        </div>
       </div>
-    </div>
-  </MetadataResolver>
+          {/snippet}
+    </MetadataResolver>
 </td>
 
 <style>

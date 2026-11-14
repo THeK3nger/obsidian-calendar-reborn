@@ -3,13 +3,18 @@
 <script lang="ts">
   import type { IDayMetadata } from "../types";
 
-  export let metadata: Promise<IDayMetadata> | null;
+  interface Props {
+    metadata: Promise<IDayMetadata> | null;
+    children?: import('svelte').Snippet<[any]>;
+  }
+
+  let { metadata, children }: Props = $props();
 </script>
 
 {#if metadata}
   {#await metadata then resolvedMeta}
-    <slot metadata="{resolvedMeta}" />
+    {@render children?.({ metadata: resolvedMeta, })}
   {/await}
 {:else}
-  <slot metadata="{null}" />
+  {@render children?.({ metadata: null, })}
 {/if}

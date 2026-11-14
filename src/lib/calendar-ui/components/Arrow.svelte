@@ -1,7 +1,11 @@
 <script lang="ts">
-  export let onClick: () => void;
-  export let tooltip: string;
-  export let direction: "left" | "right";
+  interface Props {
+    onClick: () => void;
+    tooltip: string;
+    direction: "left" | "right";
+  }
+
+  let { onClick, tooltip, direction }: Props = $props();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let isMobile = (window.app as any).isMobile;
@@ -11,7 +15,7 @@
   class="arrow"
   class:is-mobile="{isMobile}"
   class:right="{direction === 'right'}"
-  on:click="{onClick}"
+  onclick={onClick}
   aria-label="{tooltip}"
 >
   <svg

@@ -1,6 +1,8 @@
 <svelte:options immutable />
 
 <script lang="ts">
+  import { run } from 'svelte/legacy';
+
   import type { Moment } from "moment";
   import {
     Calendar as CalendarBase,
@@ -12,32 +14,44 @@
   import type { ISettings } from "src/settings";
   import { activeFile, dailyNotes, settings, weeklyNotes } from "./stores";
 
-  let today: Moment;
+  let today: Moment = $state();
 
-  $: today = getToday($settings);
 
-  export let displayedMonth: Moment = today;
-  export let sources: ICalendarSource[];
-  export let onHoverDay: (
+  interface Props {
+    displayedMonth?: Moment;
+    sources: ICalendarSource[];
+    onHoverDay: (
     date: Moment,
     targetEl: EventTarget,
     isMetaPressed?: boolean
   ) => void;
-  export let onHoverWeek: (
+    onHoverWeek: (
     date: Moment,
     targetEl: EventTarget,
     isMetaPressed?: boolean
   ) => void;
-  export let onClickDay: (
+    onClickDay: (
     date: Moment,
     isMetaPressed: boolean
   ) => void | Promise<void>;
-  export let onClickWeek: (
+    onClickWeek: (
     date: Moment,
     isMetaPressed: boolean
   ) => void | Promise<void>;
-  export let onContextMenuDay: (date: Moment, event: MouseEvent) => void;
-  export let onContextMenuWeek: (date: Moment, event: MouseEvent) => void;
+    onContextMenuDay: (date: Moment, event: MouseEvent) => void;
+    onContextMenuWeek: (date: Moment, event: MouseEvent) => void;
+  }
+
+  let {
+    displayedMonth = $bindable(today),
+    sources,
+    onHoverDay,
+    onHoverWeek,
+    onClickDay,
+    onClickWeek,
+    onContextMenuDay,
+    onContextMenuWeek
+  }: Props = $props();
 
   export function tick() {
     today = window.moment();
@@ -64,6 +78,9 @@
 
   onDestroy(() => {
     clearInterval(heartbeat);
+  });
+  run(() => {
+    today = getToday($settings);
   });
 </script>
 

@@ -10,44 +10,66 @@
   import type { ICalendarSource, IMonth } from "../types";
   import { getDaysOfWeek, getMonth, isWeekend } from "../utils";
 
-  // Localization
-  export let localeData: Locale;
+  
 
-  // Settings
-  export let showWeekNums: boolean = false;
+  
 
-  // Event Handlers
-  export let onHoverDay: (
+  
+
+  
+
+  
+  interface Props {
+    // Localization
+    localeData: Locale;
+    // Settings
+    showWeekNums?: boolean;
+    // Event Handlers
+    onHoverDay: (
     date: Moment,
     targetEl: EventTarget,
     isMetaPressed: boolean
   ) => void | Promise<void>;
-  export let onHoverWeek: (
+    onHoverWeek: (
     date: Moment,
     targetEl: EventTarget,
     isMetaPressed: boolean
   ) => void | Promise<void>;
-  export let onContextMenuDay: (date: Moment, event: MouseEvent) => void | Promise<void>;
-  export let onContextMenuWeek: (date: Moment, event: MouseEvent) => void | Promise<void>;
-  export let onClickDay: (date: Moment, isMetaPressed: boolean) => void | Promise<void>;
-  export let onClickWeek: (date: Moment, isMetaPressed: boolean) => void | Promise<void>;
+    onContextMenuDay: (date: Moment, event: MouseEvent) => void | Promise<void>;
+    onContextMenuWeek: (date: Moment, event: MouseEvent) => void | Promise<void>;
+    onClickDay: (date: Moment, isMetaPressed: boolean) => void | Promise<void>;
+    onClickWeek: (date: Moment, isMetaPressed: boolean) => void | Promise<void>;
+    // External sources (All optional)
+    sources?: ICalendarSource[];
+    selectedId: string;
+    // Override-able local state
+    today?: Moment;
+    displayedMonth?: any;
+  }
 
-  // External sources (All optional)
-  export let sources: ICalendarSource[] = [];
-  export let selectedId: string;
+  let {
+    localeData,
+    showWeekNums = false,
+    onHoverDay,
+    onHoverWeek,
+    onContextMenuDay,
+    onContextMenuWeek,
+    onClickDay,
+    onClickWeek,
+    sources = [],
+    selectedId,
+    today = window.moment(),
+    displayedMonth = $bindable(today)
+  }: Props = $props();
 
-  // Override-able local state
-  export let today: Moment = window.moment();
-  export let displayedMonth = today;
-
-  let month: IMonth;
-  let daysOfWeek: string[];
+  let month: IMonth = $derived(getMonth(displayedMonth, localeData));
+  let daysOfWeek: string[] = $derived(getDaysOfWeek(today, localeData));
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let isMobile = (window.app as any).isMobile;
 
-  $: month = getMonth(displayedMonth, localeData);
-  $: daysOfWeek = getDaysOfWeek(today, localeData);
+  
+  
 
   // Exports
   export function incrementDisplayedMonth() {

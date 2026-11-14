@@ -3,12 +3,22 @@
 
   import Arrow from "./Arrow.svelte";
 
-  export let displayedMonth: Moment;
-  export let today: Moment;
 
-  export let resetDisplayedMonth: () => void;
-  export let incrementDisplayedMonth: () => void;
-  export let decrementDisplayedMonth: () => void;
+  interface Props {
+    displayedMonth: Moment;
+    today: Moment;
+    resetDisplayedMonth: () => void;
+    incrementDisplayedMonth: () => void;
+    decrementDisplayedMonth: () => void;
+  }
+
+  let {
+    displayedMonth,
+    today,
+    resetDisplayedMonth,
+    incrementDisplayedMonth,
+    decrementDisplayedMonth
+  }: Props = $props();
 
   // Get the word 'Today' but localized to the current language
   const todayDisplayStr = today.calendar().split(/\d|\s/)[0];
@@ -18,7 +28,7 @@
 </script>
 
 <div class="nav" class:is-mobile="{isMobile}">
-  <h3 class="title" on:click="{resetDisplayedMonth}">
+  <h3 class="title" onclick={resetDisplayedMonth}>
     <span class="month">{displayedMonth.format("MMM")}</span>
     <span class="year">{displayedMonth.format("YYYY")}</span>
   </h3>
@@ -28,7 +38,7 @@
       onClick="{decrementDisplayedMonth}"
       tooltip="Previous Month"
     />
-    <div class="reset-button" on:click="{resetDisplayedMonth}">
+    <div class="reset-button" onclick={resetDisplayedMonth}>
       {todayDisplayStr}
     </div>
     <Arrow

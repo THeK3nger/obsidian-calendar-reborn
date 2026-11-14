@@ -24,6 +24,7 @@ import {
   tasksSource,
   wordCountSource,
 } from "./ui/sources";
+import { mount } from "svelte";
 
 export default class CalendarView extends ItemView {
   private calendar: Calendar;
@@ -100,19 +101,19 @@ export default class CalendarView extends ItemView {
     ];
     this.app.workspace.trigger(TRIGGER_ON_OPEN, sources);
 
-    this.calendar = new Calendar({
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      target: (this as any).contentEl,
-      props: {
-        onClickDay: this.openOrCreateDailyNote,
-        onClickWeek: this.openOrCreateWeeklyNote,
-        onHoverDay: this.onHoverDay,
-        onHoverWeek: this.onHoverWeek,
-        onContextMenuDay: this.onContextMenuDay,
-        onContextMenuWeek: this.onContextMenuWeek,
-        sources,
-      },
-    });
+    this.calendar = mount(Calendar, {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          target: (this as any).contentEl,
+          props: {
+            onClickDay: this.openOrCreateDailyNote,
+            onClickWeek: this.openOrCreateWeeklyNote,
+            onHoverDay: this.onHoverDay,
+            onHoverWeek: this.onHoverWeek,
+            onContextMenuDay: this.onContextMenuDay,
+            onContextMenuWeek: this.onContextMenuWeek,
+            sources,
+          },
+        });
   }
 
   onHoverDay(

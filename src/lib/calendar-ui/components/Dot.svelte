@@ -1,7 +1,11 @@
 <script lang="ts">
-  export let className: string = "";
-  export let isFilled: boolean;
-  export let isActive: boolean;
+  interface Props {
+    className?: string;
+    isFilled: boolean;
+    isActive: boolean;
+  }
+
+  let { className = "", isFilled, isActive }: Props = $props();
 </script>
 
 {#if isFilled}

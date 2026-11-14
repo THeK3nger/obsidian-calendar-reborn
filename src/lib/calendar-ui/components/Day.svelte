@@ -9,44 +9,61 @@
   import type { IDayMetadata } from "../types";
   import { isMetaPressed } from "../utils";
 
-  // Properties
-  export let date: Moment;
-  export let metadata: Promise<IDayMetadata> | null;
-  export let onHover: (
+  
+
+  
+  interface Props {
+    // Properties
+    date: Moment;
+    metadata: Promise<IDayMetadata> | null;
+    onHover: (
     date: Moment,
     targetEl: EventTarget,
     isMetaPressed: boolean
   ) => void | Promise<void>;
-  export let onClick: (date: Moment, isMetaPressed: boolean) => void | Promise<void>;
-  export let onContextMenu: (date: Moment, event: MouseEvent) => void | Promise<void>;
+    onClick: (date: Moment, isMetaPressed: boolean) => void | Promise<void>;
+    onContextMenu: (date: Moment, event: MouseEvent) => void | Promise<void>;
+    // Global state
+    today: Moment;
+    displayedMonth?: Moment;
+    selectedId?: string;
+  }
 
-  // Global state
-  export let today: Moment;
-  export let displayedMonth: Moment = null;
-  export let selectedId: string = null;
+  let {
+    date,
+    metadata,
+    onHover,
+    onClick,
+    onContextMenu,
+    today,
+    displayedMonth = null,
+    selectedId = null
+  }: Props = $props();
 </script>
 
 <td>
-  <MetadataResolver metadata="{metadata}" let:metadata>
-    <div
-      class="{`day ${metadata.classes.join(' ')}`}"
-      class:active="{selectedId === getDateUID(date, 'day')}"
-      class:adjacent-month="{!date.isSame(displayedMonth, 'month')}"
-      class:today="{date.isSame(today, 'day')}"
-      on:click="{onClick && ((e) => onClick(date, isMetaPressed(e)))}"
-      on:contextmenu="{onContextMenu && ((e) => onContextMenu(date, e))}"
-      on:pointerover="{onHover &&
-        ((e) => onHover(date, e.target, isMetaPressed(e)))}"
-      {...metadata.dataAttributes || {}}
-    >
-      {date.format("D")}
-      <div class="dot-container">
-        {#each metadata.dots as dot}
-          <Dot {...dot} />
-        {/each}
+  <MetadataResolver metadata="{metadata}" >
+    {#snippet children({ metadata })}
+        <div
+        class="{`day ${metadata.classes.join(' ')}`}"
+        class:active="{selectedId === getDateUID(date, 'day')}"
+        class:adjacent-month="{!date.isSame(displayedMonth, 'month')}"
+        class:today="{date.isSame(today, 'day')}"
+        onclick={onClick && ((e) => onClick(date, isMetaPressed(e)))}
+        oncontextmenu={onContextMenu && ((e) => onContextMenu(date, e))}
+        onpointerover={onHover &&
+          ((e) => onHover(date, e.target, isMetaPressed(e)))}
+        {...metadata.dataAttributes || {}}
+      >
+        {date.format("D")}
+        <div class="dot-container">
+          {#each metadata.dots as dot}
+            <Dot {...dot} />
+          {/each}
+        </div>
       </div>
-    </div>
-  </MetadataResolver>
+          {/snippet}
+    </MetadataResolver>
 </td>
 
 <style>
