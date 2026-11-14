@@ -25,6 +25,7 @@
     onClickYear?: (date: Moment, isMetaPressed: boolean) => void | Promise<void>;
     // External sources (All optional)
     sources?: ICalendarSource[];
+    metadataRevision?: number;
     selectedId: string;
     // Override-able local state
     today?: Moment;
@@ -43,6 +44,7 @@
     onClickMonth,
     onClickYear,
     sources = [],
+    metadataRevision = 0,
     selectedId,
     today = window.moment(),
     displayedMonth = $bindable(today)
@@ -103,7 +105,7 @@
           {#if showWeekNums}
             <WeekNum
               {...week}
-              metadata={getWeeklyMetadata(sources, week.days[0], today)}
+              metadata={getWeeklyMetadata(sources, week.days[0], metadataRevision)}
               onClick={onClickWeek}
               onContextMenu={onContextMenuWeek}
               onHover={onHoverWeek}
@@ -118,7 +120,7 @@
               onClick={onClickDay}
               onContextMenu={onContextMenuDay}
               onHover={onHoverDay}
-              metadata={getDailyMetadata(sources, day, today)}
+              metadata={getDailyMetadata(sources, day, metadataRevision)}
               selectedId={selectedId}
             />
           {/each}

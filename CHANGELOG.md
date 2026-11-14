@@ -1,10 +1,11 @@
 # Changelog
 
 ## [Unreleased]
+
 ### Behind the Scenes
 
 - Consolidated the five duplicated periodic-note implementations into one shared implementation.
-
+- Refresh calendar metadata only after relevant file or settings changes instead of every minute.
 
 ## v2.1.0
 

@@ -41,26 +41,29 @@
     return window.moment();
   }
 
-  // Re-derived whenever the settings change; `tick()` can override it in between.
+  // Re-derived whenever settings change; clock updates can override it in between.
   let today: Moment = $derived(getToday($settings));
   let displayedMonth: Moment = $state(window.moment());
+  let metadataRevision = $state(0);
 
-  export function tick() {
-    today = window.moment();
+  export function refreshMetadata() {
+    metadataRevision++;
   }
 
   export function setDisplayedMonth(date: Moment) {
     displayedMonth = date;
   }
 
-  // 1 minute heartbeat to keep `today` reflecting the current day
+  // One-minute heartbeat for current-day styling; metadata refreshes separately.
   let heartbeat = setInterval(() => {
-    tick();
+    const wasViewingCurrentMonth = displayedMonth.isSame(today, "month");
+    today = window.moment();
 
-    const isViewingCurrentMonth = displayedMonth.isSame(today, "day");
-    if (isViewingCurrentMonth) {
-      // if it's midnight on the last day of the month, this will
-      // update the display to show the new month.
+    // Check against the old date so we can detect a month rollover.
+    if (
+      wasViewingCurrentMonth &&
+      !displayedMonth.isSame(today, "month")
+    ) {
       displayedMonth = today;
     }
   }, 1000 * 60);
@@ -72,6 +75,7 @@
 
 <CalendarBase
   {sources}
+  {metadataRevision}
   {today}
   {onHoverDay}
   {onHoverWeek}

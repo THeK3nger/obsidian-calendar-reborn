@@ -32,7 +32,7 @@ import {
 import { mount, unmount } from "svelte";
 
 interface CalendarHandle {
-  tick(): void;
+  refreshMetadata(): void;
   setDisplayedMonth(date: Moment): void;
 }
 
@@ -62,7 +62,7 @@ export default class CalendarView extends ItemView {
 
       // Refresh the calendar if settings change
       if (this.calendar) {
-        this.calendar.tick();
+        this.calendar.refreshMetadata();
       }
     });
   }
@@ -186,13 +186,18 @@ export default class CalendarView extends ItemView {
     if (!(file instanceof TFile)) {
       return;
     }
+    let shouldRefresh = false;
     if (getDateFromFile(file, "day")) {
       dailyNotes.reindex();
-      this.updateActiveFile();
+      shouldRefresh = true;
     }
     if (getDateFromFile(file, "week")) {
       weeklyNotes.reindex();
+      shouldRefresh = true;
+    }
+    if (shouldRefresh) {
       this.updateActiveFile();
+      this.calendar?.refreshMetadata();
     }
   }
 
@@ -202,7 +207,7 @@ export default class CalendarView extends ItemView {
     }
     const date = getDateFromFile(file, "day") || getDateFromFile(file, "week");
     if (date && this.calendar) {
-      this.calendar.tick();
+      this.calendar.refreshMetadata();
     }
   }
 
@@ -211,13 +216,17 @@ export default class CalendarView extends ItemView {
       return;
     }
     if (this.app.workspace.layoutReady && this.calendar) {
+      let shouldRefresh = false;
       if (getDateFromFile(file, "day")) {
         dailyNotes.reindex();
-        this.calendar.tick();
+        shouldRefresh = true;
       }
       if (getDateFromFile(file, "week")) {
         weeklyNotes.reindex();
-        this.calendar.tick();
+        shouldRefresh = true;
+      }
+      if (shouldRefresh) {
+        this.calendar.refreshMetadata();
       }
     }
   }
@@ -231,10 +240,6 @@ export default class CalendarView extends ItemView {
   private updateActiveFile(): void {
     const view = this.app.workspace.getActiveViewOfType(FileView);
     activeFile.setFile(view?.file ?? null);
-
-    if (this.calendar) {
-      this.calendar.tick();
-    }
   }
 
   public revealActiveNote(): void {
