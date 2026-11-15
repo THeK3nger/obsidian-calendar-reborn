@@ -2,10 +2,17 @@
 
 ## [Unreleased]
 
+## v2.1.1
+
+### Fixed
+
+- Word count dots now count Japanese and Chinese text. Previously these characters were ignored, so notes written in those languages showed no dots.
+
 ### Behind the Scenes
 
 - Consolidated the five duplicated periodic-note implementations into one shared implementation.
 - Refresh calendar metadata only after relevant file or settings changes instead of every minute.
+- Moved the small UI helpers next to the code that uses them.
 
 ## v2.1.0
 
