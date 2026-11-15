@@ -27,7 +27,7 @@ function getWordCount(text: string): number {
   const pattern = new RegExp(
     [
       `(?:[0-9]+(?:(?:,|\\.)[0-9]+)*|[\\-${spaceDelimitedChars}])+`,
-      nonSpaceDelimitedWords,
+      `[${nonSpaceDelimitedWords}]`,
     ].join("|"),
     "g"
   );
