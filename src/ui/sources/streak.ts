@@ -5,12 +5,9 @@ import { getDailyNote, getWeeklyNote } from "src/lib/daily-notes";
 import { get } from "svelte/store";
 
 import { dailyNotes, weeklyNotes } from "../stores";
-import { classList } from "../utils";
 
 const getStreakClasses = (file: TFile): string[] => {
-  return classList({
-    "has-note": !!file,
-  });
+  return file ? ["has-note"] : [];
 };
 
 export const streakSource: ICalendarSource = {

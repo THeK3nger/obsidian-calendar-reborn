@@ -4,9 +4,25 @@ import type { ICalendarSource, IDayMetadata } from "src/lib/calendar-ui";
 import { getDailyNote, getWeeklyNote } from "src/lib/daily-notes";
 import { get } from "svelte/store";
 
-import { partition } from "src/ui/utils";
-
 import { dailyNotes, weeklyNotes } from "../stores";
+
+function partition(
+  arr: string[],
+  predicate: (elem: string) => boolean
+): [string[], string[]] {
+  const pass: string[] = [];
+  const fail: string[] = [];
+
+  arr.forEach((elem) => {
+    if (predicate(elem)) {
+      pass.push(elem);
+    } else {
+      fail.push(elem);
+    }
+  });
+
+  return [pass, fail];
+}
 
 function getNoteTags(note: TFile | null): string[] {
   if (!note) {

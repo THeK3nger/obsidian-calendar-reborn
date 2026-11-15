@@ -2,13 +2,37 @@ import type { TFile } from "obsidian";
 import {
   getAllDailyNotes,
   getAllWeeklyNotes,
+  getDateFromFile,
+  getDateUID,
 } from "src/lib/daily-notes";
 import { writable } from "svelte/store";
 
 import { defaultSettings } from "src/settings";
 import type { ISettings } from "src/settings";
 
-import { getDateUIDFromFile } from "./utils";
+/**
+ * Lookup the dateUID for a given file. It compares the filename
+ * to the daily and weekly note formats to find a match.
+ *
+ * @param file
+ */
+function getDateUIDFromFile(file: TFile | null): string {
+  if (!file) {
+    return null;
+  }
+
+  // TODO: I'm not checking the path!
+  let date = getDateFromFile(file, "day");
+  if (date) {
+    return getDateUID(date, "day");
+  }
+
+  date = getDateFromFile(file, "week");
+  if (date) {
+    return getDateUID(date, "week");
+  }
+  return null;
+}
 
 function createDailyNotesStore() {
   let hasError = false;
