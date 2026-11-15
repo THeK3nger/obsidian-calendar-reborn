@@ -13,7 +13,7 @@ import type { TAbstractFile } from "obsidian";
 import type { WorkspaceLeaf } from "obsidian";
 import { get } from "svelte/store";
 
-import { TRIGGER_ON_OPEN, VIEW_TYPE_CALENDAR } from "src/constants";
+import { VIEW_TYPE_CALENDAR } from "src/constants";
 import {
   findPeriodicNote,
   openOrCreatePeriodicNote,
@@ -94,7 +94,7 @@ export default class CalendarView extends ItemView {
       wordCountSource,
       tasksSource,
     ];
-    this.app.workspace.trigger(TRIGGER_ON_OPEN, sources);
+    this.app.workspace.trigger("calendar:open", sources);
 
     this.calendar = mount(Calendar, {
       target: this.contentEl,
